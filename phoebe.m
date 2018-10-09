@@ -659,7 +659,7 @@ function menu_settings_Callback(hObject, ~, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-uiwait(phoebe_settings(handles))
+uiwait(digitizer_settings(handles))
 
 
 
