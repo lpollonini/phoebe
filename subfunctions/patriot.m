@@ -88,8 +88,8 @@ end
 com.Timeout = 30; % after this amount of time in seconds, program will end
 
 %% Setup of audio cues
-listing_alpha = dir([cd filesep 'audio-alphabet' filesep '*.wav']); % sets criteria for the alphabetic side of audio
-listing_num = dir([cd filesep 'audio-numbers' filesep '*.wav']); % sets criteria for the numerical side of audio
+listing_alpha = dir([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep '*.wav']); % sets criteria for the alphabetic side of audio
+listing_num = dir([cd filesep 'subfunctions' filesep 'audio-numbers' filesep '*.wav']); % sets criteria for the numerical side of audio
 fs = 8000; % sampling frequency for audio
 T = 0.05; % period
 t = 0:(1/fs):T;
@@ -115,42 +115,42 @@ for i = 1:nfid
         case 1 % for the first fiducial
             % extracts the desired letter and stores in s,Fs (based on what numerical value the letter has in alphabet) and stores in s,Fs
             set(handles.view_SD,'String','NZ')
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(14).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(14).name]);
             sound(s,Fs); 
             pause(0.5)
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(26).name]); 
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(26).name]); 
             sound(s,Fs);
 
         case 2 % for the second fiducial
             set(handles.view_SD,'String','AR')
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(1).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(1).name]);
             sound(s,Fs); 
             pause(0.5) 
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(18).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(18).name]);
             sound(s,Fs);
 
         case 3 % for third fiducial
             set(handles.view_SD,'String','AL')
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(1).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(1).name]);
             sound(s,Fs); 
             pause(0.5) 
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(12).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(12).name]);
             sound(s,Fs);
 
         case 4 % for the fourth fiducial
             set(handles.view_SD,'String','CZ')
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(3).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(3).name]);
             sound(s,Fs); 
             pause(0.5) 
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(26).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(26).name]);
             sound(s,Fs); 
 
         case 5 % for the 5th fiducial
             set(handles.view_SD,'String','IZ')
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(9).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(9).name]);
             sound(s,Fs); 
             pause(0.5) 
-            [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(26).name]);
+            [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(26).name]);
             sound(s,Fs); % plays desired letter
     end
     response = fscanf(com,'%d %f %f %f %f %f %f %f %d %f %f %f %f %f %f %f',[1,16]); % read data taken from Patriot and store as 1x16 matrix
@@ -209,10 +209,10 @@ end
 %% Acquisition of ns sources
 for i = 1:ns  % For all sources...
     set(handles.view_SD,'String',['S', num2str(i)]) % Display current source on GUI
-    [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(19).name]);
+    [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(19).name]);
     sound(s,Fs); % play desired letter
     pause(0.5) % pause between letters
-    [s,Fs] = audioread([cd filesep 'audio-numbers' filesep listing_num(i).name]);
+    [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-numbers' filesep listing_num(i).name]);
     sound(s,Fs); % play desired number
     response = fscanf(com,'%d %f %f %f %f %f %f %f %d %f %f %f %f %f %f %f',[1,16]); % extract points from Patriot and store in 1x14 matrix
     pause(0.1)
@@ -271,10 +271,10 @@ end
 %% Acquisition of nd detectors
 for i = 1:nd % For all detectors
     set(handles.view_SD,'String',['D', num2str(i)])
-    [s,Fs] = audioread([cd filesep 'audio-alphabet' filesep listing_alpha(4).name]);
+    [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-alphabet' filesep listing_alpha(4).name]);
     sound(s,Fs);
     pause(0.5)
-    [s,Fs] = audioread([cd filesep 'audio-numbers' filesep listing_num(i).name]);
+    [s,Fs] = audioread([cd filesep 'subfunctions' filesep 'audio-numbers' filesep listing_num(i).name]);
     sound(s,Fs);
     response = fscanf(com,'%d %f %f %f %f %f %f %f %d %f %f %f %f %f %f %f',[1,16]);
     pause(0.1)
