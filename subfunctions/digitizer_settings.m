@@ -58,6 +58,8 @@ handles.output = hObject;
 handles_main = findobj('Tag','figure_main');
 main_data = guidata(handles_main);
 
+set(handles.popupmenu_orientation,'Value',main_data.patriot_hemisphere);
+
 com_list = seriallist;  % Pull a list of available serial ports for digitizer
 if ~isempty(com_list)
     for i = 1:length(com_list)
