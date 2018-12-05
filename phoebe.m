@@ -613,8 +613,16 @@ function menu_range2pairings_Callback(hObject, ~, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-
+guidata(hObject, handles);
+uiwait(create_pairings(handles))
+handles_main = findobj('Tag','figure_main');
+handles = guidata(handles_main);
+handles = load_dig_pts(handles,handles.dig_pts_path);  % Import digitized layout and transform into atlas space
+handles = load_SD(handles,handles.pairings_path);  % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
+cla(handles.axes_left);
+cla(handles.axes_right);
+plot_atlas
+guidata(hObject, handles);
 
 
 %% MENU ABOUT -> CHECK UPDATE
