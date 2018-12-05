@@ -170,11 +170,11 @@ for i = 1:nfid
     q1 = response(6);
     q2 = response(7);
     q3 = response(8);
-    R = [q0^2+q1^2-q2^2-q3^2 2*(q1*q2-q0*q3) 2*(q1*q3+q0*q2);...
+    rotation = [q0^2+q1^2-q2^2-q3^2 2*(q1*q2-q0*q3) 2*(q1*q3+q0*q2);...
          2*(q3*q0+q1*q2) q0^2-q1^2+q2^2-q3^2 2*(q2*q3-q0*q1);...
          2*(q1*q3-q0*q2) 2*(q1*q0+q3*q2) q0^2-q1^2-q2^2+q3^2];
     offset=[x2; y2; z2] - [x1; y1; z1];
-    v = R'*offset;
+    v = rotation'*offset;
     x = v(1);
     y = v(2);
     z = v(3);
@@ -231,11 +231,11 @@ for i = 1:ns  % For all sources...
     q1 = response(6);
     q2 = response(7);
     q3 = response(8);
-    R = [q0^2+q1^2-q2^2-q3^2 2*(q1*q2-q0*q3) 2*(q1*q3+q0*q2);...
+    rotation = [q0^2+q1^2-q2^2-q3^2 2*(q1*q2-q0*q3) 2*(q1*q3+q0*q2);...
          2*(q3*q0+q1*q2) q0^2-q1^2+q2^2-q3^2 2*(q2*q3-q0*q1);...
          2*(q1*q3-q0*q2) 2*(q1*q0+q3*q2) q0^2-q1^2-q2^2+q3^2];
     offset=[x2; y2; z2] - [x1; y1; z1];
-    v = R'*offset;
+    v = rotation'*offset;
     x = v(1);
     y = v(2);
     z = v(3);
@@ -293,11 +293,11 @@ for i = 1:nd % For all detectors
     q1 = response(6);
     q2 = response(7);
     q3 = response(8);
-    R = [q0^2+q1^2-q2^2-q3^2 2*(q1*q2-q0*q3) 2*(q1*q3+q0*q2);...
+    rotation = [q0^2+q1^2-q2^2-q3^2 2*(q1*q2-q0*q3) 2*(q1*q3+q0*q2);...
          2*(q3*q0+q1*q2) q0^2-q1^2+q2^2-q3^2 2*(q2*q3-q0*q1);...
          2*(q1*q3-q0*q2) 2*(q1*q0+q3*q2) q0^2-q1^2-q2^2+q3^2];
     offset=[x2; y2; z2] - [x1; y1; z1];
-    v = R'*offset;
+    v = rotation'*offset;
     x = v(1);
     y = v(2);
     z = v(3);
