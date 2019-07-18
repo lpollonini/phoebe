@@ -162,8 +162,8 @@ if first_time == 1
             else % Not a default SD pairing
                 det_pts = handles.det_pts;
                 src_pts = handles.src_pts;
-                idx_min_cell=rangesearch(det_pts,src_pts,min_pts_range);
-                idx_max_cell=rangesearch(det_pts,src_pts,max_pts_range);
+                idx_min_cell=sd_rangesearch(det_pts,src_pts,min_pts_range);
+                idx_max_cell=sd_rangesearch(det_pts,src_pts,max_pts_range);
                 for i = 1:size(idx_max_cell,1)
                     idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
                 end

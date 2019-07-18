@@ -358,8 +358,8 @@ dig_pts_path = [PathName FileName];
 % Compute and save pairings file and make it the new default.
 min_pts_range = str2double(get(handles.min_optode_dist_edit,'String'));
 max_pts_range = str2double(get(handles.max_optode_dist_edit,'String'));
-idx_min_cell=rangesearch(det_pts,src_pts,min_pts_range);
-idx_max_cell=rangesearch(det_pts,src_pts,max_pts_range);
+idx_min_cell=sd_rangesearch(det_pts,src_pts,min_pts_range);
+idx_max_cell=sd_rangesearch(det_pts,src_pts,max_pts_range);
 for i = 1:size(idx_max_cell,1)
     idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
 end

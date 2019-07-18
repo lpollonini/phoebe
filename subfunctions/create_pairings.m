@@ -87,8 +87,8 @@ main_data = guidata(handles_main);
 main_data = load_dig_pts(main_data,main_data.dig_pts_path);
 det_pts = main_data.det_pts;
 src_pts = main_data.src_pts;
-idx_min_cell=rangesearch(det_pts,src_pts,str2double(get(handles.edit_min_optode_distance,'String')));
-idx_max_cell=rangesearch(det_pts,src_pts,str2double(get(handles.edit_max_optode_distance,'String')));
+idx_min_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_min_optode_distance,'String')));
+idx_max_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_max_optode_distance,'String')));
 for i = 1:size(idx_max_cell,1)
     idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
 end
