@@ -441,10 +441,10 @@ while ishandle(hObject) && get(hObject,'Value')
         similarity = xcorr(filtered_nirs_data1(:,col),filtered_nirs_data2(:,col),'unbiased');  %cross-correlate the two wavelength signals - both should have cardiac pulsations
         similarity = length(filtered_nirs_data1(:,col))*similarity./sqrt(sum(abs(filtered_nirs_data1(:,col)).^2)*sum(abs(filtered_nirs_data2(:,col)).^2));  % this makes the SCI=1 at lag zero when x1=x2 AND makes the power estimate independent of signal length, amplitude and Fs
         [pxx,f] = periodogram(similarity,hamming(length(similarity)),length(similarity),handles.fs,'power');
-        [pwrest,idx] = max(pxx(f<1.7)); % FIX Make it age-dependent
-        sci=similarity(length(filtered_nirs_data1(1:end,i)));
-        power=pwrest;
-        fpower=f(idx);
+        [pwrest,idx] = max(pxx(f<fcut_max));
+        sci = similarity(length(filtered_nirs_data1(1:end,i)));
+        power = pwrest;
+        fpower = f(idx);
         sci_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = sci;    % Adjust not based on machine
         power_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = power;
         fpower_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = fpower;
