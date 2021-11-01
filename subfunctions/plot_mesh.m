@@ -14,7 +14,6 @@ axis off;
 axis vis3d
 view(18,8);
 set(gca, 'CameraViewAngle', 6)
-lightangle(225,30)
 lighting phong;
 
 end

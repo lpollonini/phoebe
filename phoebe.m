@@ -45,6 +45,7 @@ else
 end
 
 
+
 % --- Executes just before phoebe is made visible.
 function phoebe_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -85,126 +86,45 @@ if exist([pwd filesep 'init.mat'],'file') == 2
 end
 
 
-%% Check Version
-if w3conn()
-    latest_ver = str2double(webread('http://polloninilab.com/version.txt'));
-    if current_ver < latest_ver
-        uiwait(msgbox(['PHOEBE Version ' num2double(latest_ver) ' is available. Please download it at http://bitbucket.org/lpollonini/phoebe'],'PHOEBE update','help'))
-%        choice = questdlg('A new version of PHOEBE is available. Would you like to update it?','Settings','Yes','No','Yes');
-%         if strcmp(choice,'Yes') % download new version of phoebe
-%             current_ver = latest_ver;
-%             save([pwd filesep 'init.mat'],'current_ver','-append');
-%             !phoebe_update.exe
-%             exit
-%             % Interrupt this execution
-%         end
-    end
-end
+% %% Check Version
+% if w3conn()
+%     latest_ver = str2double(webread('http://polloninilab.com/version.txt'));
+%     if current_ver < latest_ver
+%         uiwait(msgbox(['PHOEBE Version ' num2double(latest_ver) ' is available. Please download it at http://bitbucket.org/lpollonini/phoebe'],'PHOEBE update','help'))
+% %        choice = questdlg('A new version of PHOEBE is available. Would you like to update it?','Settings','Yes','No','Yes');
+% %         if strcmp(choice,'Yes') % download new version of phoebe
+% %             current_ver = latest_ver;
+% %             save([pwd filesep 'init.mat'],'current_ver','-append');
+% %             !phoebe_update.exe
+% %             exit
+% %             % Interrupt this execution
+% %         end
+%     end
+% end
 
 %% Check if this is the first use: if yes, ask for configuration to save in 'init.mat'
+
 handles.opacity = opacity;
 handles.zoom_index = zoom_index;
-if first_time == 1
-    % Patriot user?
-    choice = questdlg('Are you using Polhemus Patriot to digitize optodes?','Settings','Yes','No','Yes');
-    if strcmp(choice,'Yes') % Patriot user
-        patriot_user = 1;
-        save([pwd filesep 'init.mat'],'patriot_user','-append');  % Saving patriot flag in init.mat
-        
-        choice = questdlg({'Do you have a previous 3D digitization to be used as default?','NOTE: This is for first time use only. The default digitization can be changed at any time in menu Settings'},'Digitized Optodes','Yes','No','Yes');
-        if strcmp(choice,'Yes')
-            [FileName,PathName] = uigetfile('*.txt','Select the subject digitization file','C:\Users\owner\Desktop\Digitization\*.txt');
-            dig_pts_path = [PathName FileName];
-            save([pwd filesep 'init.mat'],'dig_pts_path','-append')
-            handles = load_dig_pts(handles,dig_pts_path); % Import digitized layout and transform into atlas space
-            
-            choice = questdlg({'Do you have a source-detector pairings file (Homer format) to be used as default?','If not, it will be created for you based on the S-D euclidean distance.'},'Digitized Optodes','Yes','No','Yes');
-            if strcmp(choice,'Yes')
-                [FileName,PathName] = uigetfile('*.SD','Select the optodes pairings file','*.SD');
-                load([PathName FileName],'-mat');
-                % maybe a sanity check to see if digitization and SD pairs go along?
-                pairings_path = [PathName FileName];
-                save([pwd filesep 'init.mat'],'pairings_path','-append')
-            else % Not a default SD pairing
-                % Choose range
-                % Execute SDrange
-                % Save SD file in chosen location
-            end
-            % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
-            handles = load_SD(handles,pairings_path);
-            % In the settings dialog, we can ask to recompute based on new distance
-            plot_atlas
-        
-        else
-            uiwait(warndlg('Since there is no default optode layout, please digitize your headgear before monitoring the scalp coupling with Phoebe','No default digitization file','modal'));
-            plot_atlas_empty
-        end
-        %maybe settings window based on init file, so user can choose to
-        %default one 3D scan, point to a different one, or perform a new probe clicking.
+handles.axes_left.View = [165,10];
+handles.axes_right.View = [165,10];
+
+if first_time == 1 
     
-    else    % Non-Patriot user
-        patriot_user = 0;
-        save([pwd filesep 'init.mat'],'patriot_user','-append');  % Saving patriot flag in init.mat
-        
-        choice = questdlg('Do you want to use a previously saved 3D digitization?','Digitized Optodes','Yes','No','Yes');
-        if strcmp(choice,'Yes')
-            [FileName,PathName] = uigetfile('*.txt','Select the subject digitization file','C:\Users\owner\Desktop\Digitization\*.txt');
-            dig_pts_path = [PathName FileName];
-            save([pwd filesep 'init.mat'],'dig_pts_path','-append')
-            handles = load_dig_pts(handles,dig_pts_path); % Import digitized layout and transform into atlas space
-            
-            choice = questdlg({'Do you have a source-detector pairings file (Homer format)?','If not, it will be created for you based on the S-D euclidean distance'},'Digitized Optodes','Yes','No','Yes');
-            if strcmp(choice,'Yes')
-                [FileName,PathName] = uigetfile('*.SD','Select the optodes pairings file','*.SD');
-                load([PathName FileName],'-mat');
-                pairings_path = [PathName FileName];
-                save([pwd filesep 'init.mat'],'pairings_path','-append')
-            else % Not a default SD pairing
-                det_pts = handles.det_pts;
-                src_pts = handles.src_pts;
-                idx_min_cell=sd_rangesearch(det_pts,src_pts,min_pts_range);
-                idx_max_cell=sd_rangesearch(det_pts,src_pts,max_pts_range);
-                for i = 1:size(idx_max_cell,1)
-                    idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
-                end
-                row=1;
-                MeasList=[];
-                for i=1:size(src_pts,1)
-                    det_conn=sort(idx{i,1});
-                    for j=1:length(det_conn)
-                        MeasList(row,:)=[i det_conn(j) 1 1];
-                        row=row+1;
-                    end
-                end
-                % convert for NIRS toolbox format
-                SD.SrcPos = src_pts;
-                SD.DetPos = det_pts;
-                SD.nSrcs = size(src_pts,1);
-                SD.nDets = size(det_pts,1);
-                MeasList2 = MeasList;
-                MeasList2(:,4) = 2;
-                SD.MeasList = [MeasList; MeasList2];
-                pairings_path = [PathName FileName(1:end-4) '_pairings.SD'];
-                save(pairings_path,'SD');
-                save([pwd filesep 'init.mat'],'pairings_path','-append')
-            end
-            % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
-            handles = load_SD(handles,pairings_path); % If there is a digitization file, there must be a pairings path, so no need ot check for it as in my Phoebe_dist?
-            % In the settings dialog, we can ask to recompute based on new distance
-            plot_atlas
-        
-        else % No default digitization: point and click on head model?           
-            choice = questdlg('Do you want to create an aproximate 3D digitization by locating optodes on a head model with mouse clicks?','Digitized Optodes','Yes','No','Yes');
-            if strcmp(choice,'Yes')
-                uiwait(probe_configuration(handles))
-            else
-                uiwait(warndlg('Since there is no default optode layout, please select a default Patriot digitization or create an aproximate one before monitoring the scalp coupling with Phoebe','No default digitization file','modal'));
-            end
-            plot_atlas_empty
-        end
+    choice = questdlg({'Do you have a previous 3D digitization to be used as default?','NOTE: This is for first time use only. The default digitization can be changed at any time in menu Settings'},'Digitized Optodes','Yes','No','Yes');
+    if strcmp(choice,'Yes')
+        [FileName,PathName] = uigetfile('*.txt','Select the subject digitization file','C:\Users\owner\Desktop\Digitization\*.txt');
+        dig_pts_path = [PathName FileName];
+        save([pwd filesep 'init.mat'],'dig_pts_path','-append')
+        handles = load_dig_pts(handles,dig_pts_path); % Import digitized layout and transform into atlas space
+        % In the settings dialog, we can ask to recompute based on new distance
+        plot_atlas_digpts
+    else
+        uiwait(warndlg('Since there is no default optode layout, please digitize your headgear before monitoring the scalp coupling with Phoebe','No default digitization file','modal'));
+        plot_atlas_empty
     end
     first_time = 0;
-    save([pwd filesep 'init.mat'],'first_time','dig_pts_path','pairings_path','-append');  % Update first time flag in init.mat
+    save([pwd filesep 'init.mat'],'first_time','dig_pts_path','-append');  % Update first time flag in init.mat
     
 else % After first time
     
@@ -218,23 +138,16 @@ else % After first time
     % Import digitized layout and transform into atlas space
     if ~strcmp(dig_pts_path,'')
         handles = load_dig_pts(handles,dig_pts_path);
-        % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
-        handles = load_SD(handles,pairings_path); % If there is a digitization file, there must be a pairings path, so no need ot check for it as in my Phoebe_dist?
-        % In the settings dialog, we can ask to recompute based on new distance
         handles.dig_pts_path = dig_pts_path;
-        handles.pairings_path = pairings_path;
-        plot_atlas
+        plot_atlas_digpts
     else
         plot_atlas_empty
     end
     
-%     switch device
-%         case 'NIRx'
-%            handles.nirx_cfg_path = nirx_cfg_path; 
-%     end
-    
 end % End first or non-first time 
 
+% If we know the number of sources, detectors and fiducials, set them on
+% the GUI
 if ~isfield(handles,'src_num')
     set(handles.source_dropdown,'Value',1);
     set(handles.detector_dropdown,'Value',1);
@@ -249,6 +162,7 @@ else
     end
 end
 
+% Set all the pre-loaded parameters on the GUI 
 set(handles.edit_lowcutoff,'string',num2str(fcut_min));
 set(handles.edit_highcutoff,'string',num2str(fcut_max));
 set(handles.edit_threshold,'string',num2str(sci_threshold));
@@ -282,7 +196,7 @@ end
 if eventdata.NewValue == handles.radiobutton_doubleview
     cla(handles.axes_left)
     if isfield(handles,'fid_pts')
-        plot_atlas
+        plot_atlas_digpts
     else
         plot_atlas_empty
     end
@@ -517,7 +431,7 @@ handles.opacity = get(hObject,'Value');
 cla(handles.axes_left);
 cla(handles.axes_right);
 if isfield(handles,'fid_pts')
-    plot_atlas;
+    plot_atlas_digpts;
 else
     plot_atlas_empty;
 end
@@ -537,7 +451,7 @@ handles.zoom_index = 1 - get(hObject,'Value');
 cla(handles.axes_left);
 cla(handles.axes_right);
 if isfield(handles,'fid_pts')
-    plot_atlas;
+    plot_atlas_digpts;
 else
     plot_atlas_empty;
 end

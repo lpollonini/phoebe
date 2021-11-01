@@ -1,4 +1,4 @@
-set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
+set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview); % Always plot two heads 
 cla(handles.axes_left);
 cla(handles.axes_right);
 plot_mesh(handles.axes_left,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity);

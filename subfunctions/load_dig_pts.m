@@ -2,13 +2,13 @@ function [ handles ] = load_dig_pts( handles, dig_pts_path )
 %LOAD_DIG_PTS Summary of this function goes here
 %   Detailed explanation goes here
 
-dig_pts=importdata(dig_pts_path);        
+dig_pts = importdata(dig_pts_path);        
 
 % Fiducials nz, ar, al to be used for transformation into predefined atlas
-match1=find(ismember(dig_pts.textdata,'nz:'));
-match2=find(ismember(dig_pts.textdata,'ar:'));
-match3=find(ismember(dig_pts.textdata,'al:'));
-fid_pts(1:3,:)=dig_pts.data([match1 match2 match3],:);
+match1 = find(ismember(dig_pts.textdata,'nz:'));
+match2 = find(ismember(dig_pts.textdata,'ar:'));
+match3 = find(ismember(dig_pts.textdata,'al:'));
+fid_pts(1:3,:) = dig_pts.data([match1 match2 match3],:);
 
 % Reads all sources and detectors
 match_s1 = find(ismember(dig_pts.textdata,'s1:'));
