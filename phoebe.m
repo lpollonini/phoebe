@@ -215,7 +215,7 @@ cla(handles.axes_left)
 cla(handles.axes_right)
 handles = guidata(hObject);
 handles = load_dig_pts(handles,handles.dig_pts_path);  % Import digitized layout and transform into atlas space
-handles = load_SD(handles,handles.pairings_path);  % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
+%handles = load_SD(handles,handles.pairings_path);  % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
 plot_atlas
 
 
@@ -602,7 +602,7 @@ function menu_online_help_Callback(hObject, ~, handles)
 % hObject    handle to menu_online_help (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-url = 'https://bitbucket.org/lpollonini/phoebe/wiki';
+url = 'https://github.com/lpollonini/phoebe/wiki';
 web(url,'-browser')
 
 % --------------------------------------------------------------------
