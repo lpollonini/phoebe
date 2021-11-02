@@ -468,23 +468,22 @@ cla(handles.axes_right);
 dig_pts_path = [PathName FileName];
 save([pwd filesep 'init.mat'],'dig_pts_path','-append')
 handles.dig_pts_path = dig_pts_path;
-choice = questdlg({'Do you have a source-detector pairings file (Homer format) to be used as default?','If not, it will be created for you based on the S-D euclidean distance.'},'Digitized Optodes','Yes','No','Yes');
-if strcmp(choice,'Yes')
-    [FileName,PathName] = uigetfile('*.SD','Select the optodes pairings file',[PathName '*.SD']);
-    load([PathName FileName],'-mat');
-    % maybe a sanity check to see if digitization and SD pairs go along?
-    pairings_path = [PathName FileName];
-    save([pwd filesep 'init.mat'],'pairings_path','-append')
-    handles.pairings_path = pairings_path;
-else
-    guidata(hObject, handles);
-    uiwait(create_pairings(handles))
-    handles_main = findobj('Tag','figure_main');
-    handles = guidata(handles_main);
-end
+% choice = questdlg({'Do you have a source-detector pairings file (Homer format) to be used as default?','If not, it will be created for you based on the S-D euclidean distance.'},'Digitized Optodes','Yes','No','Yes');
+% if strcmp(choice,'Yes')
+%     [FileName,PathName] = uigetfile('*.SD','Select the optodes pairings file',[PathName '*.SD']);
+%     load([PathName FileName],'-mat');
+%     % maybe a sanity check to see if digitization and SD pairs go along?
+%     pairings_path = [PathName FileName];
+%     save([pwd filesep 'init.mat'],'pairings_path','-append')
+%     handles.pairings_path = pairings_path;
+% else
+%     guidata(hObject, handles);
+%     uiwait(create_pairings(handles))
+%     handles_main = findobj('Tag','figure_main');
+%     handles = guidata(handles_main);
+% end
 handles = load_dig_pts(handles,handles.dig_pts_path);  % Import digitized layout and transform into atlas space
-handles = load_SD(handles,handles.pairings_path);  % Loads SD pairs to be considered for Phoebe, and saves info into GUI handler
-plot_atlas
+plot_atlas_digpts
 guidata(hObject, handles);
 
 

@@ -47,6 +47,8 @@ guidata(hObject,handles);
 function rot3dcallback(obj,evd)
     handles = guidata(obj);
     lightangle(handles.h_light_left, handles.axes_left.View(1),handles.axes_left.View(2))
-    lightangle(handles.h_light_right, handles.axes_right.View(1),handles.axes_right.View(2))
+    if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+        lightangle(handles.h_light_right, handles.axes_right.View(1),handles.axes_right.View(2))
+    end
 end
 
