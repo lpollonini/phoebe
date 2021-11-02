@@ -223,51 +223,80 @@ plot_atlas
 function togglebutton_scan_Callback(hObject, ~, handles, FileName, PathName)
 % Hint: get(hObject,'Value') returns toggle state of togglebutton_scan
 
-if get(hObject,'Value') %If currently STOP
-    set(handles.togglebutton_scan,'String','STOP MONITOR');
+if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL preparation steps
+    %Update some graphics
+    set(handles.togglebutton_scan,'String','STOP MONITORING QUALITY');
     set(handles.radiobutton_singleview,'Enable','off');
     set(handles.radiobutton_doubleview,'Enable','off');
     drawnow
     
-    lib = lsl_loadlib(); % Loading LSL library
+    % Load LSL library
+    lib = lsl_loadlib(); 
     if isempty(lib)
        uiwait(msgbox('LSL library not loaded','PHOEBE','error')) 
     end
     
-    result = lsl_resolve_byprop(lib,'name','NIRStar');
-    if ~isempty(result)
-        inlet = lsl_inlet(result{1});
-        [dummy,~] = inlet.pull_chunk();
-    else
-        uiwait(warndlg('Please PREVIEW or RECORD data in NIRStar and ensure that the LSL streaming (full mask) is active','PHOEBE'))
-        set(handles.togglebutton_scan,'String','START MONITOR');
-        set(handles.togglebutton_scan,'Value',0);
-        set(handles.radiobutton_singleview,'Enable','on');
-        set(handles.radiobutton_doubleview,'Enable','on');
-        guidata(hObject,handles)
-        return
-    end
-    
-    switch(get(handles.popupmenu_device,'value'))   % Instrument
-        case 1  % NIRx
-            if (result{1}.channel_count - 1) ~= 2*size(handles.src_pts,1)*size(handles.det_pts,1)
-                uiwait(warndlg('The size of streaming data does not correspond to the probe size. Please ensure that the number of sources and detectors in NIRStar and PHOEBE are set consistently.','PHOEBE'))
-                set(handles.togglebutton_scan,'String','START MONITOR');
+    % Resolve LSL stream depending on selected software/instrument
+    switch(get(handles.popupmenu_device,'value'))
+        case 1  % NIRStar
+            result = lsl_resolve_byprop(lib,'name','NIRStar');
+            if ~isempty(result)
+                inlet = lsl_inlet(result{1});
+                [dummy,~] = inlet.pull_chunk();
+            else
+                uiwait(warndlg('Please PREVIEW or RECORD data in NIRStar and ensure that the LSL streaming is active','PHOEBE'))
+                set(handles.togglebutton_scan,'String','START MONITORING QUALITY');
                 set(handles.togglebutton_scan,'Value',0);
                 set(handles.radiobutton_singleview,'Enable','on');
                 set(handles.radiobutton_doubleview,'Enable','on');
                 guidata(hObject,handles)
                 return
             end
-            handles.fs = result{1}.nominal_srate;
-            buffer_rows = floor(handles.fs*str2double(get(handles.edit_SCIwindow,'string'))); % Number of frames to be buffered
-            lsl_buffer = zeros(buffer_rows,result{1}.channel_count);
-        case 2  % Another device
             
+            % RAIAN: Parse probe information from metadata and create a
+            % measurement list from all channels (similar to former
+            % SDpairs). Since the LSL array will contain NIRS and non-NIRS
+            % data (i.e., time, EEG, accelerometers, etc), the SDpairs will
+            % need to include at least four columns: #S, #D, #lambda,
+            % #LSL_index so to parse the data out easily down below.
+            % Alternatively, you could do #S, #D, #LSL_index_lambda1, #LSL_index_lambda2. 
+            
+        case 2  % Aurora
+            %TBD
+   
+        case 3  % OxySOft
+            %TBD
     end
-    num_optodes = size(handles.src_pts,1) + size(handles.det_pts,1); % Computes total optodes based on loaded probe 
     
-    % Plots filled markers, but we need the handlers h1 and h2 of optodes to update their colors below (weird)
+    % LUCA: it may still be a good idea to check that the LSL stream is
+    % consistent with PHOEBE graphics to avoid drawing issues. With the
+    % SDpairs infor created above, it should not be too difficult (just
+    % check that number of sources, detectors and (maybe) channels all
+    % coincide, and we could do it for all devices
+%     switch(get(handles.popupmenu_device,'value'))
+%         case 1  % NIRx
+%             if (result{1}.channel_count - 1) ~= 2*size(handles.src_pts,1)*size(handles.det_pts,1)
+%                 uiwait(warndlg('The size of streaming data does not correspond to the probe size. Please ensure that the number of sources and detectors in NIRStar and PHOEBE are set consistently.','PHOEBE'))
+%                 set(handles.togglebutton_scan,'String','START MONITOR');
+%                 set(handles.togglebutton_scan,'Value',0);
+%                 set(handles.radiobutton_singleview,'Enable','on');
+%                 set(handles.radiobutton_doubleview,'Enable','on');
+%                 guidata(hObject,handles)
+%                 return
+%             end
+%         case 2  % Another device  
+%     end
+    
+    % Prepare the LSL buffer (window_time x LSL_channel_count, all devices)
+    handles.fs = result{1}.nominal_srate;
+    buffer_rows = floor(handles.fs*str2double(get(handles.edit_SCIwindow,'string'))); % Number of frames to be buffered
+    lsl_buffer = zeros(buffer_rows,result{1}.channel_count);
+    
+    % Computes total optodes based on loaded probe 
+    num_optodes = size(handles.src_pts,1) + size(handles.det_pts,1); 
+    
+    % LUCA: revise this according to the optode vs. channel quality 
+    % Plot filled markers, but we need the handlers h1 and h2 of optodes to update their colors below (weird)
     hold(handles.axes_left,'on')
     hold(handles.axes_right,'on')
     delete(handles.h_src_left);
@@ -281,8 +310,7 @@ if get(hObject,'Value') %If currently STOP
         h4=scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s'); 
     end
     
-    % Reads the filter parameters form panel and computes low-pass coeffs
-    % (FIX make script or function)
+    % Reads the filter parameters from panel and computes low-pass coeffs
     fcut_min=str2double(get(handles.edit_lowcutoff,'string'));
     fcut_max=str2double(get(handles.edit_highcutoff,'string'));
     if fcut_max >= (handles.fs)/2
@@ -300,38 +328,50 @@ end
 
 % If START/STOP button is START mode, run this loop indefinitely until the button is toggled
 while ishandle(hObject) && get(hObject,'Value')
+    
+    % Read a chunk of data and fill the buffer (all devices)
+    while nnz(lsl_buffer(:,1)) < size(lsl_buffer,1) % if the FIFO buffer is not totally full (first few secs), wait until it fills
+        while 1
+            [chunk,~] = inlet.pull_chunk(); % Pull a chunk of fresh samples
+            if ~isempty(chunk)
+                break
+            end
+        end
+        chunk = chunk';
+        if size(chunk,1) < size(lsl_buffer,1)    % If the data chunk is smaller than the buffer
+            lsl_buffer(1:size(lsl_buffer,1)-size(chunk,1),:) = lsl_buffer(size(chunk,1)+1:end,:); % Shift up the buffer to make room 
+            lsl_buffer(size(lsl_buffer,1)-size(chunk,1)+1:end,:) = chunk; % Put chunk in buffer
+        else
+            lsl_buffer(:,:) = chunk(size(chunk,1)-size(lsl_buffer,1)+1:end,:); % Put chunk in buffer
+        end% Put chunk in buffer
+    end
+    % We are repeating the same code above to make room for new samples when the buffer is already filled from previous pulls 
+    while 1
+        [chunk,~] = inlet.pull_chunk(); % Pull a chunk of fresh samples
+        if ~isempty(chunk)
+            break
+        end
+    end
+    chunk = chunk';
+    if size(chunk,1) < size(lsl_buffer,1)    % If the data chunk is smaller than the buffer
+        lsl_buffer(1:size(lsl_buffer,1)-size(chunk,1),:) = lsl_buffer(size(chunk,1)+1:end,:); % Shift up the buffer to make room 
+        lsl_buffer(size(lsl_buffer,1)-size(chunk,1)+1:end,:) = chunk; % Put chunk in buffer
+    else
+        lsl_buffer(:,:) = chunk(size(chunk,1)-size(lsl_buffer,1)+1:end,:); % Put chunk in buffer
+    end
+    
+    % Parse the data depending on the device-specific arrangement(metadata)
     switch(get(handles.popupmenu_device,'value'))
         case 1  % NIRx
-            while nnz(lsl_buffer(:,1)) < size(lsl_buffer,1) % if the FIFO buffer is not totally full (first few secs), fill it
-                while 1
-                    [chunk,~] = inlet.pull_chunk(); % Pull a chunk of fresh samples
-                    if ~isempty(chunk)
-                        break
-                    end
-                end
-                chunk = chunk';
-                if size(chunk,1) < size(lsl_buffer,1)    % If the data chunk is smaller than the buffer
-                    lsl_buffer(1:size(lsl_buffer,1)-size(chunk,1),:) = lsl_buffer(size(chunk,1)+1:end,:); % Shift up the buffer to make room 
-                    lsl_buffer(size(lsl_buffer,1)-size(chunk,1)+1:end,:) = chunk; % Put chunk in buffer
-                else
-                    lsl_buffer(:,:) = chunk(size(chunk,1)-size(lsl_buffer,1)+1:end,:); % Put chunk in buffer
-                end% Put chunk in buffer
-            end
             
-            while 1
-                [chunk,~] = inlet.pull_chunk(); % Pull a chunk of fresh samples
-                if ~isempty(chunk)
-                    break
-                end
-            end
-            chunk = chunk';
-            if size(chunk,1) < size(lsl_buffer,1)    % If the data chunk is smaller than the buffer
-                lsl_buffer(1:size(lsl_buffer,1)-size(chunk,1),:) = lsl_buffer(size(chunk,1)+1:end,:); % Shift up the buffer to make room 
-                lsl_buffer(size(lsl_buffer,1)-size(chunk,1)+1:end,:) = chunk; % Put chunk in buffer
-            else
-                lsl_buffer(:,:) = chunk(size(chunk,1)-size(lsl_buffer,1)+1:end,:); % Put chunk in buffer
-            end
+            % RAIAN: using the SDpairs created above from metadata, extract meaningful
+            % NIRS data from the lsl_buffer and place them into matrices
+            % nirs_data1 and nirs_data2 (time x fNIRS_channels for lambda 1
+            % and 2 respectively). The channel arrangement by columns must be
+            % consistent for lambdas 1 and 2.
             
+            % In this case, it was all channels (useful and useless
+            % combinations), but it will become smaller now
             nirs_data1 = lsl_buffer(:,2:size(handles.src_pts,1)*size(handles.det_pts,1)+1);
             nirs_data2 = lsl_buffer(:,size(handles.src_pts,1)*size(handles.det_pts,1)+2:end);
             
@@ -339,32 +379,47 @@ while ishandle(hObject) && get(hObject,'Value')
     
     end % End readout of incoming data
     
-    % Filter everything bu the cardiac component
+    % Filter everything but the cardiac component
     filtered_nirs_data1=filtfilt(B1,A1,nirs_data1);       % Cardiac bandwidth
     filtered_nirs_data1=filtered_nirs_data1./repmat(std(filtered_nirs_data1,0,1),size(filtered_nirs_data1,1),1); % Normalized heartbeat
     filtered_nirs_data2=filtfilt(B1,A1,nirs_data2);       % Cardiac bandwidth
     filtered_nirs_data2=filtered_nirs_data2./repmat(std(filtered_nirs_data2,0,1),size(filtered_nirs_data2,1),1); % Normalized heartbeat
     
     % Distributes all the measures in the optode "battlefield" matrix
-    sci_matrix = zeros(num_optodes,num_optodes);    % Number of optode is from the user's layout, not the machine
+    sci_matrix = zeros(num_optodes,num_optodes);    % Number of optode is from the user's layout, not the machine, hence we may want to check for consistency here?
     power_matrix = zeros(num_optodes,num_optodes);
     fpower_matrix = zeros(num_optodes,num_optodes);
     A = zeros(num_optodes,num_optodes);
-    for i=1:size(handles.SDpairs,1)
-        col = (handles.SDpairs(i,1)-1)*handles.det_num + handles.SDpairs(i,2);  
-        similarity = xcorr(filtered_nirs_data1(:,col),filtered_nirs_data2(:,col),'unbiased');  %cross-correlate the two wavelength signals - both should have cardiac pulsations
-        similarity = length(filtered_nirs_data1(:,col))*similarity./sqrt(sum(abs(filtered_nirs_data1(:,col)).^2)*sum(abs(filtered_nirs_data2(:,col)).^2));  % this makes the SCI=1 at lag zero when x1=x2 AND makes the power estimate independent of signal length, amplitude and Fs
+    
+    % RAIAN: here we will need to loop over all optical channels described
+    % in SDpairs
+    for ch = 1 : size(handles.SDpairs,1)
+        % This was done with NIRX to select only the useful channels of of
+        % the total combos: no longer needed!
+        % col = (handles.SDpairs(i,1)-1)*handles.det_num + handles.SDpairs(i,2);  
+        
+        % Compute quality measures channel-by-channel
+        similarity = xcorr(filtered_nirs_data1(:,ch),filtered_nirs_data2(:,ch),'unbiased');  %cross-correlate the two wavelength signals - both should have cardiac pulsations
+        similarity = length(filtered_nirs_data1(:,ch))*similarity./sqrt(sum(abs(filtered_nirs_data1(:,ch)).^2)*sum(abs(filtered_nirs_data2(:,ch)).^2));  % this makes the SCI=1 at lag zero when x1=x2 AND makes the power estimate independent of signal length, amplitude and Fs
         [pxx,f] = periodogram(similarity,hamming(length(similarity)),length(similarity),handles.fs,'power');
         [pwrest,idx] = max(pxx(f<fcut_max));
         sci = similarity(length(filtered_nirs_data1(1:end,i)));
         power = pwrest;
         fpower = f(idx);
+        
+        % Here we use SDpairs to place the measures in the right
+        % battlefield place
         sci_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = sci;    % Adjust not based on machine
         power_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = power;
         fpower_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = fpower;
         A(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = 1;   % Adjacency matrix: marks all the active pairs with 1, rest is 0
     end
-    W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) & (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); % Weight boolean matrix: here we set the criteria for pass
+    
+    % LUCA: Here we need to split between optode-level and link-level assessment.
+    % What follows is the optode-level:
+    
+    % Weight boolean matrix: here we set the criteria for passing thresholds
+    W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) & (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); 
     % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
     [optodes_status] = boolean_system(num_optodes,A,W); 
     optodes_color = zeros(length(optodes_status),3);
@@ -379,6 +434,7 @@ while ishandle(hObject) && get(hObject,'Value')
         end
     end
    
+    % Update optodes graphics
     set(h1,'CData',optodes_color(1:handles.src_num,:));
     set(h2,'CData',optodes_color(handles.src_num+1:end,:));
     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
