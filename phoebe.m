@@ -119,6 +119,7 @@ if first_time == 1
         handles = load_dig_pts(handles,dig_pts_path); % Import digitized layout and transform into atlas space
         % In the settings dialog, we can ask to recompute based on new distance
         plot_atlas_digpts
+        plot_links
     else
         uiwait(warndlg('Since there is no default optode layout, please digitize your headgear before monitoring the scalp coupling with Phoebe','No default digitization file','modal'));
         plot_atlas_empty
@@ -140,6 +141,7 @@ else % After first time
         handles = load_dig_pts(handles,dig_pts_path);
         handles.dig_pts_path = dig_pts_path;
         plot_atlas_digpts
+        plot_links
     else
         plot_atlas_empty
     end
@@ -197,6 +199,7 @@ if eventdata.NewValue == handles.radiobutton_doubleview
     cla(handles.axes_left)
     if isfield(handles,'fid_pts')
         plot_atlas_digpts
+        plot_links
     else
         plot_atlas_empty
     end
@@ -242,7 +245,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
             result = lsl_resolve_byprop(lib,'name','NIRStar');
             if ~isempty(result)
                 inlet = lsl_inlet(result{1});
-                [dummy,~] = inlet.pull_chunk();
+                [~,~] = inlet.pull_chunk();
             else
                 uiwait(warndlg('Please PREVIEW or RECORD data in NIRStar and ensure that the LSL streaming is active','PHOEBE'))
                 set(handles.togglebutton_scan,'String','START MONITORING QUALITY');
@@ -488,6 +491,7 @@ cla(handles.axes_left);
 cla(handles.axes_right);
 if isfield(handles,'fid_pts')
     plot_atlas_digpts;
+    plot_links
 else
     plot_atlas_empty;
 end
@@ -508,6 +512,7 @@ cla(handles.axes_left);
 cla(handles.axes_right);
 if isfield(handles,'fid_pts')
     plot_atlas_digpts;
+    plot_links
 else
     plot_atlas_empty;
 end
@@ -540,6 +545,7 @@ handles.dig_pts_path = dig_pts_path;
 % end
 handles = load_dig_pts(handles,handles.dig_pts_path);  % Import digitized layout and transform into atlas space
 plot_atlas_digpts
+plot_links
 guidata(hObject, handles);
 
 

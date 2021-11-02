@@ -2,7 +2,10 @@ function [ handles ] = load_dig_pts( handles, dig_pts_path )
 %LOAD_DIG_PTS Summary of this function goes here
 %   Detailed explanation goes here
 
-dig_pts = importdata(dig_pts_path);        
+dig_pts = importdata(dig_pts_path);
+if isempty(dig_pts)
+    return
+end
 
 % Fiducials nz, ar, al to be used for transformation into predefined atlas
 match1 = find(ismember(dig_pts.textdata,'nz:'));
