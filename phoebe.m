@@ -304,13 +304,44 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     hold(handles.axes_right,'on')
     delete(handles.h_src_left);
     delete(handles.h_det_left);
-    h1=scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill');
-    h2=scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s');
+    h1 = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
+    h2 = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
+%     % Might be an overkill
+    det_pts = handles.det_pts;
+    src_pts = handles.src_pts;
+    % idx_min_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_min_optode_distance,'String')));
+    % idx_max_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_max_optode_distance,'String')));
+    idx_min_cell=sd_rangesearch(det_pts,src_pts,20);
+    idx_max_cell=sd_rangesearch(det_pts,src_pts,50);
+    for i = 1:size(idx_max_cell,1)
+        idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
+    end
+    row=1;
+    SDpairs=[];
+    for i=1:size(src_pts,1)
+        det_conn=sort(idx{i,1});
+        for j=1:length(det_conn)
+            SDpairs(row,:)=[i det_conn(j) 1 1];
+            row=row+1;
+        end
+    end
+    px = zeros(2,size(SDpairs,1));
+    py = zeros(2,size(SDpairs,1));
+    pz = zeros(2,size(SDpairs,1));
+    for i=1:size(SDpairs,1)
+        p1 = handles.src_pts(SDpairs(i,1),:);
+        p2 = handles.det_pts(SDpairs(i,2),:);
+        px(:,i) = [p1(1);p2(1)];
+        py(:,i) = [p1(2);p2(2)];
+        pz(:,i) = [p1(3);p2(3)];
+    end
+    hl1 = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
     if get(handles.uipanel_head,'SelectedObject') == handles.radiobutton_doubleview
         delete(handles.h_src_right);
         delete(handles.h_det_right);
-        h3=scatter3(handles.axes_right,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill');
-        h4=scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s'); 
+        h3=scatter3(handles.axes_right,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
+        h4=scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2); 
+        hl2 = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
     end
     
     % Reads the filter parameters from panel and computes low-pass coeffs
@@ -418,33 +449,40 @@ while ishandle(hObject) && get(hObject,'Value')
         A(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = 1;   % Adjacency matrix: marks all the active pairs with 1, rest is 0
     end
     
-    % LUCA: Here we need to split between optode-level and link-level assessment.
-    % What follows is the optode-level:
-    
     % Weight boolean matrix: here we set the criteria for passing thresholds
     W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) & (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); 
-    % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
-    [optodes_status] = boolean_system(num_optodes,A,W); 
-    optodes_color = zeros(length(optodes_status),3);
-    for i=1:length(optodes_status)
-        switch(optodes_status(i))
-            case 1
-                optodes_color(i,:) = [0 1 0];
-            case 0
-                optodes_color(i,:) = [1 0 0];
-            case -1
-                optodes_color(i,:) = [1 1 0];
+    
+    % LUCA: Here we need to split between optode-level and link-level assessment.
+    % What follows is the optode-level:
+    if optode_solution
+        % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
+        [optodes_status] = boolean_system(num_optodes,A,W); 
+        optodes_color = zeros(length(optodes_status),3);
+        for i=1:length(optodes_status)
+            switch(optodes_status(i))
+                case 1
+                    optodes_color(i,:) = [0 1 0];
+                case 0
+                    optodes_color(i,:) = [1 0 0];
+                case -1
+                    optodes_color(i,:) = [1 1 0];
+            end
         end
+        % Update optodes graphics
+        set(h1,'CData',optodes_color(1:handles.src_num,:));
+        set(h2,'CData',optodes_color(handles.src_num+1:end,:));
+        if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+            set(h3,'CData',optodes_color(1:handles.src_num,:));
+            set(h4,'CData',optodes_color(handles.src_num+1:end,:));
+        end
+        drawnow
+    else %channel solution
+%         [row,col] = find(W(1:size(handles.src_pts,1),size(handles.src_pts,1)+1:end));
+%         col = col - size(handles.src_pts,1);
+%         for i = 1:length(row)
+%             
+%         end
     end
-   
-    % Update optodes graphics
-    set(h1,'CData',optodes_color(1:handles.src_num,:));
-    set(h2,'CData',optodes_color(handles.src_num+1:end,:));
-    if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-        set(h3,'CData',optodes_color(1:handles.src_num,:));
-        set(h4,'CData',optodes_color(handles.src_num+1:end,:));
-    end
-    drawnow
 end
 
 
