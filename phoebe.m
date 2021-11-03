@@ -109,44 +109,22 @@ handles.zoom_index = zoom_index;
 handles.axes_left.View = [165,10];
 handles.axes_right.View = [165,10];
 
-if first_time == 1 
-    
-    choice = questdlg({'Do you have a previous 3D digitization to be used as default?','NOTE: This is for first time use only. The default digitization can be changed at any time in menu Settings'},'Digitized Optodes','Yes','No','Yes');
-    if strcmp(choice,'Yes')
-        [FileName,PathName] = uigetfile('*.txt','Select the subject digitization file','C:\Users\owner\Desktop\Digitization\*.txt');
-        dig_pts_path = [PathName FileName];
-        save([pwd filesep 'init.mat'],'dig_pts_path','-append')
-        handles = load_dig_pts(handles,dig_pts_path); % Import digitized layout and transform into atlas space
-        % In the settings dialog, we can ask to recompute based on new distance
-        plot_atlas_digpts
-        plot_links
-    else
-        uiwait(warndlg('Since there is no default optode layout, please digitize your headgear before monitoring the scalp coupling with Phoebe','No default digitization file','modal'));
-        plot_atlas_empty
-    end
-    first_time = 0;
-    save([pwd filesep 'init.mat'],'first_time','dig_pts_path','-append');  % Update first time flag in init.mat
-    
-else % After first time
-    
-    % Prepare one or two head models for plotting
-    if double_view==0
-        set(handles.uipanel_head,'SelectedObject',handles.radiobutton_singleview);
-    else
-        set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
-    end
+% Prepare one or two head models for plotting
+if double_view==0
+    set(handles.uipanel_head,'SelectedObject',handles.radiobutton_singleview);
+else
+    set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
+end
 
-    % Import digitized layout and transform into atlas space
-    if ~strcmp(dig_pts_path,'')
-        handles = load_dig_pts(handles,dig_pts_path);
-        handles.dig_pts_path = dig_pts_path;
-        plot_atlas_digpts
-        plot_links
-    else
-        plot_atlas_empty
-    end
-    
-end % End first or non-first time 
+% Import digitized layout and transform into atlas space
+if ~strcmp(dig_pts_path,'')
+    handles = load_dig_pts(handles,dig_pts_path);
+    handles.dig_pts_path = dig_pts_path;
+    plot_atlas_digpts
+    plot_links
+else
+    plot_atlas_empty
+end
 
 % If we know the number of sources, detectors and fiducials, set them on
 % the GUI
@@ -236,7 +214,8 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     % Load LSL library
     lib = lsl_loadlib(); 
     if isempty(lib)
-       uiwait(msgbox('LSL library not loaded','PHOEBE','error')) 
+       uiwait(msgbox('LSL library not loaded. Please ensure that the subfolder is included in the MATLAB path.','PHOEBE','error'));
+       return
     end
     
     % Resolve LSL stream depending on selected software/instrument
@@ -276,19 +255,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     % SDpairs infor created above, it should not be too difficult (just
     % check that number of sources, detectors and (maybe) channels all
     % coincide, and we could do it for all devices
-%     switch(get(handles.popupmenu_device,'value'))
-%         case 1  % NIRx
-%             if (result{1}.channel_count - 1) ~= 2*size(handles.src_pts,1)*size(handles.det_pts,1)
-%                 uiwait(warndlg('The size of streaming data does not correspond to the probe size. Please ensure that the number of sources and detectors in NIRStar and PHOEBE are set consistently.','PHOEBE'))
-%                 set(handles.togglebutton_scan,'String','START MONITOR');
-%                 set(handles.togglebutton_scan,'Value',0);
-%                 set(handles.radiobutton_singleview,'Enable','on');
-%                 set(handles.radiobutton_doubleview,'Enable','on');
-%                 guidata(hObject,handles)
-%                 return
-%             end
-%         case 2  % Another device  
-%     end
+
     
     % Prepare the LSL buffer (window_time x LSL_channel_count, all devices)
     handles.fs = result{1}.nominal_srate;
@@ -344,15 +311,8 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
         hl2 = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
     end
     
-    % Reads the filter parameters from panel and computes low-pass coeffs
-    fcut_min=str2double(get(handles.edit_lowcutoff,'string'));
-    fcut_max=str2double(get(handles.edit_highcutoff,'string'));
-    if fcut_max >= (handles.fs)/2
-        fcut_max = (handles.fs)/2 - eps;
-        set(handles.edit_highcutoff,'string',num2str(fcut_max));
-        uiwait(warndlg('The highpass cutoff has been reduced to Nyquist sampling rate. This setting will be saved for future use.'));
-    end
-    [B1,A1]=butter(1,[fcut_min*(2/handles.fs) fcut_max*(2/handles.fs)]);
+    % Reads the filter parameters from panel and computes bandpass coeffs
+    [B,A]=bandpass_coefficients;
 
 else % Stops monitoring
     set(handles.togglebutton_scan,'String','START MONITOR');
@@ -414,9 +374,9 @@ while ishandle(hObject) && get(hObject,'Value')
     end % End readout of incoming data
     
     % Filter everything but the cardiac component
-    filtered_nirs_data1=filtfilt(B1,A1,nirs_data1);       % Cardiac bandwidth
+    filtered_nirs_data1=filtfilt(B,A,nirs_data1);       % Cardiac bandwidth
     filtered_nirs_data1=filtered_nirs_data1./repmat(std(filtered_nirs_data1,0,1),size(filtered_nirs_data1,1),1); % Normalized heartbeat
-    filtered_nirs_data2=filtfilt(B1,A1,nirs_data2);       % Cardiac bandwidth
+    filtered_nirs_data2=filtfilt(B,A,nirs_data2);       % Cardiac bandwidth
     filtered_nirs_data2=filtered_nirs_data2./repmat(std(filtered_nirs_data2,0,1),size(filtered_nirs_data2,1),1); % Normalized heartbeat
     
     % Distributes all the measures in the optode "battlefield" matrix
@@ -427,25 +387,19 @@ while ishandle(hObject) && get(hObject,'Value')
     
     % RAIAN: here we will need to loop over all optical channels described
     % in SDpairs
-    for ch = 1 : size(handles.SDpairs,1)
+    for i = 1 : size(handles.SDpairs,1)
         % This was done with NIRX to select only the useful channels of of
         % the total combos: no longer needed!
         % col = (handles.SDpairs(i,1)-1)*handles.det_num + handles.SDpairs(i,2);  
         
         % Compute quality measures channel-by-channel
-        similarity = xcorr(filtered_nirs_data1(:,ch),filtered_nirs_data2(:,ch),'unbiased');  %cross-correlate the two wavelength signals - both should have cardiac pulsations
-        similarity = length(filtered_nirs_data1(:,ch))*similarity./sqrt(sum(abs(filtered_nirs_data1(:,ch)).^2)*sum(abs(filtered_nirs_data2(:,ch)).^2));  % this makes the SCI=1 at lag zero when x1=x2 AND makes the power estimate independent of signal length, amplitude and Fs
-        [pxx,f] = periodogram(similarity,hamming(length(similarity)),length(similarity),handles.fs,'power');
-        [pwrest,idx] = max(pxx(f<fcut_max));
-        sci = similarity(length(filtered_nirs_data1(1:end,i)));
-        power = pwrest;
-        fpower = f(idx);
+        [sci,psp,fpsp] = quality_metrics(filtered_nirs_data1(:,i),filtered_nirs_data2(:,i));
         
         % Here we use SDpairs to place the measures in the right
         % battlefield place
         sci_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = sci;    % Adjust not based on machine
-        power_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = power;
-        fpower_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = fpower;
+        power_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = psp;
+        fpower_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = fpsp;
         A(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = 1;   % Adjacency matrix: marks all the active pairs with 1, rest is 0
     end
     
