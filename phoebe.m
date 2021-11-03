@@ -24,7 +24,7 @@ function varargout = phoebe(varargin)
 
 % Edit the above text to modify the response to help phoebe
 
-% Last Modified by GUIDE v2.5 23-Sep-2018 11:30:32
+% Last Modified by GUIDE v2.5 03-Nov-2021 16:14:08
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -265,7 +265,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     % Computes total optodes based on loaded probe 
     num_optodes = size(handles.src_pts,1) + size(handles.det_pts,1); 
     
-    % LUCA: revise this according to the optode vs. channel quality 
+    % LUCA: revise this according to the optode vs. channel quality
     % Plot filled markers, but we need the handlers h1 and h2 of optodes to update their colors below (weird)
     hold(handles.axes_left,'on')
     hold(handles.axes_right,'on')
@@ -406,9 +406,8 @@ while ishandle(hObject) && get(hObject,'Value')
     % Weight boolean matrix: here we set the criteria for passing thresholds
     W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) & (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); 
     
-    % LUCA: Here we need to split between optode-level and link-level assessment.
-    % What follows is the optode-level:
-    if optode_solution
+    % Display results at the optode level or the channel level
+    if get(handles.radiobutton_qoptode,'Value',1)
         % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
         [optodes_status] = boolean_system(num_optodes,A,W); 
         optodes_color = zeros(length(optodes_status),3);
@@ -436,6 +435,7 @@ while ishandle(hObject) && get(hObject,'Value')
 %         for i = 1:length(row)
 %             
 %         end
+        drawnow
     end
 end
 
@@ -692,3 +692,21 @@ function menu_digitizer_Callback(hObject, eventdata, handles)
 % hObject    handle to menu_digitizer (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in radiobutton8.
+function radiobutton8_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton8
+
+
+% --- Executes on button press in radiobutton9.
+function radiobutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to radiobutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton9
