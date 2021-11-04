@@ -1,4 +1,4 @@
-function [B,A] = bandpass_coefficients
+function [B,A] = bandpass_coefficients(handles)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 

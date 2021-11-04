@@ -312,7 +312,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     end
     
     % Reads the filter parameters from panel and computes bandpass coeffs
-    [B,A]=bandpass_coefficients;
+    [B,A] = bandpass_coefficients(handles);
 
 else % Stops monitoring
     set(handles.togglebutton_scan,'String','START MONITOR');
@@ -370,7 +370,7 @@ while ishandle(hObject) && get(hObject,'Value')
             nirs_data2 = lsl_buffer(:,size(handles.src_pts,1)*size(handles.det_pts,1)+2:end);
             
         case 2  % Other device
-    
+ 
     end % End readout of incoming data
     
     % Filter everything but the cardiac component
