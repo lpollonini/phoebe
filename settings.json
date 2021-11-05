@@ -1,0 +1,17 @@
+{
+	"baud_rate" : 115200,
+	"com_port" : "COM1",
+	"device" : "NIRStar",
+	"patriot_hemisphere" : 1,
+	"zoom_index" : 0.5,
+	"opacity" : 0.8,
+	"fcut_min" : 0.4,
+	"fcut_max" : 2.4,
+	"double_view" : 0,
+	"psp_threshold" : 0.1,
+	"sci_window" : 3,
+	"sci_threshold" : 0.7,
+	"min_sd_range" : 15,
+	"max_sd_range" : 40,
+	"dig_pts_path" : "C:/Users/lpolloni/Digitization/ale8x8.txt"
+}

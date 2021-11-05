@@ -70,56 +70,48 @@ create_tabs;
 load_atlas;
 
 %% Loads initialization parameters (last saved Phoebe settings)
-load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-if exist([pwd filesep 'init.mat'],'file') == 2
-    load([pwd filesep 'init.mat']);
-    if ~isempty(dig_pts_path) && ~exist(dig_pts_path, 'file')
-      warningMessage = sprintf('Warning: file does not exist:\n%s', dig_pts_path);
-      uiwait(msgbox(warningMessage));
-      load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-    end
-    if ~isempty(pairings_path) && ~exist(pairings_path, 'file')
-      warningMessage = sprintf('Warning: file does not exist:\n%s', pairings_path);
-      uiwait(msgbox(warningMessage));
-      load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-    end
-end
-
-
-% %% Check Version
-% if w3conn()
-%     latest_ver = str2double(webread('http://polloninilab.com/version.txt'));
-%     if current_ver < latest_ver
-%         uiwait(msgbox(['PHOEBE Version ' num2double(latest_ver) ' is available. Please download it at http://bitbucket.org/lpollonini/phoebe'],'PHOEBE update','help'))
-% %        choice = questdlg('A new version of PHOEBE is available. Would you like to update it?','Settings','Yes','No','Yes');
-% %         if strcmp(choice,'Yes') % download new version of phoebe
-% %             current_ver = latest_ver;
-% %             save([pwd filesep 'init.mat'],'current_ver','-append');
-% %             !phoebe_update.exe
-% %             exit
-% %             % Interrupt this execution
-% %         end
+% load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
+% if exist([pwd filesep 'init.mat'],'file') == 2
+%     load([pwd filesep 'init.mat']);
+%     if ~isempty(dig_pts_path) && ~exist(dig_pts_path, 'file')
+%       warningMessage = sprintf('Warning: file does not exist:\n%s', dig_pts_path);
+%       uiwait(msgbox(warningMessage));
+%       load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
+%     end
+%     if ~isempty(pairings_path) && ~exist(pairings_path, 'file')
+%       warningMessage = sprintf('Warning: file does not exist:\n%s', pairings_path);
+%       uiwait(msgbox(warningMessage));
+%       load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
 %     end
 % end
 
-%% Check if this is the first use: if yes, ask for configuration to save in 'init.mat'
-
-handles.opacity = opacity;
-handles.zoom_index = zoom_index;
+if exist([pwd filesep 'settings.json'],'file') ~= 2
+      uiwait(msgbox('File SETTINGS.JSON is missing from the root folder. If it cannot be located, please download it anew from GitHub.'));
+else
+    settings = jsondecode(fileread('settings.json'));
+%         if ~isempty(dig_pts_path) && ~exist(dig_pts_path, 'file')
+%           warningMessage = sprintf('Warning: file does not exist:\n%s', dig_pts_path);
+%           uiwait(msgbox(warningMessage));
+%           load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
+%         end
+end
+handles.settings = settings;
+handles.opacity = settings.opacity;
+handles.zoom_index = settings.zoom_index;
 handles.axes_left.View = [165,10];
 handles.axes_right.View = [165,10];
 
 % Prepare one or two head models for plotting
-if double_view==0
+if settings.double_view==0
     set(handles.uipanel_head,'SelectedObject',handles.radiobutton_singleview);
 else
     set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
 end
 
 % Import digitized layout and transform into atlas space
-if ~strcmp(dig_pts_path,'')
-    handles = load_dig_pts(handles,dig_pts_path);
-    handles.dig_pts_path = dig_pts_path;
+if ~strcmp(settings.dig_pts_path,'')
+    handles = load_dig_pts(handles,settings.dig_pts_path);
+    handles.dig_pts_path = settings.dig_pts_path;
     plot_atlas_digpts
     plot_links
 else
@@ -143,18 +135,18 @@ else
 end
 
 % Set all the pre-loaded parameters on the GUI 
-set(handles.edit_lowcutoff,'string',num2str(fcut_min));
-set(handles.edit_highcutoff,'string',num2str(fcut_max));
-set(handles.edit_threshold,'string',num2str(sci_threshold));
-set(handles.min_optode_dist_edit,'String',num2str(min_pts_range));
-set(handles.max_optode_dist_edit,'String',num2str(max_pts_range));
-set(handles.edit_SCIwindow,'string',num2str(sci_window));
-set(handles.edit_spectral_threshold,'string',num2str(power_threshold));
-set(handles.slider_opacity,'value',opacity);
-handles.baud_rate = baud_rate;
-handles.com_port = com_port;
-handles.patriot_hemisphere = patriot_hemisphere;
-handles.current_ver = current_ver;
+set(handles.edit_lowcutoff,'string',num2str(settings.fcut_min));
+set(handles.edit_highcutoff,'string',num2str(settings.fcut_max));
+set(handles.edit_threshold,'string',num2str(settings.sci_threshold));
+set(handles.min_optode_dist_edit,'String',num2str(settings.min_sd_range));
+set(handles.max_optode_dist_edit,'String',num2str(settings.max_sd_range));
+set(handles.edit_SCIwindow,'string',num2str(settings.sci_window));
+set(handles.edit_spectral_threshold,'string',num2str(settings.psp_threshold));
+set(handles.slider_opacity,'value',settings.opacity);
+handles.baud_rate = settings.baud_rate;
+handles.com_port = settings.com_port;
+handles.patriot_hemisphere = settings.patriot_hemisphere;
+%handles.current_ver = current_ver;
 
 % Update GUI handler and launch GUI inferface
 guidata(hObject, handles);
@@ -444,22 +436,22 @@ end
 % When user attempts to close GUI, then save all the parameters from the panel
 function figure_main_CloseRequestFcn(hObject, ~, handles)
 
-fcut_min = str2double(get(handles.edit_lowcutoff,'string'));
-fcut_max = str2double(get(handles.edit_highcutoff,'string'));
-sci_threshold = str2double(get(handles.edit_threshold,'string'));
+handles = guidata(hObject);
+handles.settings.fcut_min = str2double(get(handles.edit_lowcutoff,'string'));
+handles.settings.fcut_max = str2double(get(handles.edit_highcutoff,'string'));
+handles.settings.sci_threshold = str2double(get(handles.edit_threshold,'string'));
 if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_singleview
-    double_view = 0;
+    handles.settings.double_view = 0;
 else
-    double_view = 1;
+    handles.settings.double_view = 1;
 end
-sci_window = str2double(get(handles.edit_SCIwindow,'string'));
-power_threshold = str2double(get(handles.edit_spectral_threshold,'string'));
-%com_port = get(handles.com_port_edit,'String');
-%baud_rate = get(handles.baud_rate_edit,'String');
-min_pts_range = str2double(get(handles.min_optode_dist_edit,'String'));
-max_pts_range = str2double(get(handles.max_optode_dist_edit,'String'));
-opacity = get(handles.slider_opacity,'Value');
-save([pwd filesep 'init.mat'],'fcut_min','fcut_max','sci_threshold','double_view','sci_window','sci_window','power_threshold','min_pts_range','max_pts_range','opacity','-append')
+handles.settings.sci_window = str2double(get(handles.edit_SCIwindow,'string'));
+handles.settings.psp_threshold = str2double(get(handles.edit_spectral_threshold,'string'));
+handles.settings.min_sd_range = str2double(get(handles.min_optode_dist_edit,'String'));
+handles.settings.max_sd_range = str2double(get(handles.max_optode_dist_edit,'String'));
+handles.settings.opacity = get(handles.slider_opacity,'Value');
+saveJSONfile(handles.settings,'settings.json')
+%save([pwd filesep 'init.mat'],'fcut_min','fcut_max','sci_threshold','double_view','sci_window','sci_window','psp_threshold','min_sd_range','max_sd_range','opacity','-append')
 % Hint: delete(hObject) closes the figure
 if ~isempty(instrfind)
     fclose(instrfind)
@@ -519,7 +511,10 @@ cla(handles.axes_left);
 cla(handles.axes_right);
 [FileName,PathName] = uigetfile('*.txt','Select the subject digitization file','C:\Users\owner\Desktop\Digitization\*.txt');
 dig_pts_path = [PathName FileName];
-save([pwd filesep 'init.mat'],'dig_pts_path','-append')
+idx_slash = strfind(dig_pts_path,'\');
+dig_pts_path(idx_slash) = '/';
+handles.settings.dig_pts_path = dig_pts_path;
+saveJSONfile(handles.settings,'settings.json')
 handles.dig_pts_path = dig_pts_path;
 % choice = questdlg({'Do you have a source-detector pairings file (Homer format) to be used as default?','If not, it will be created for you based on the S-D euclidean distance.'},'Digitized Optodes','Yes','No','Yes');
 % if strcmp(choice,'Yes')
