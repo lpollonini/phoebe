@@ -89,6 +89,14 @@ else
     set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
 end
 
+% Set solution for plotting
+if strcmp(settings.quality_view, "optodes")
+    set(handles.uibuttongroup_qc,'SelectedObject',handles.radiobutton_qoptode);
+else
+    set(handles.uibuttongroup_qc,'SelectedObject',handles.radiobutton_qchannel);
+end
+
+
 % Import digitized layout and transform into atlas space
 if ~strcmp(settings.dig_pts_path,'')
     handles = load_dig_pts(handles,settings.dig_pts_path);
@@ -425,6 +433,11 @@ if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_singleview
     handles.settings.double_view = 0;
 else
     handles.settings.double_view = 1;
+end
+if get(handles.uibuttongroup_qc,'SelectedObject') == handles.radiobutton_qoptode
+    handles.settings.quality_view = "optodes";
+else
+    handles.settings.quality_view = "channels";
 end
 handles.settings.sci_window = str2double(get(handles.edit_SCIwindow,'string'));
 handles.settings.psp_threshold = str2double(get(handles.edit_spectral_threshold,'string'));
