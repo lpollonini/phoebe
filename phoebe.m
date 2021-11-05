@@ -85,8 +85,10 @@ handles.axes_right.View = settings.view_right;
 % Prepare one or two head models for plotting
 if settings.double_view==0
     set(handles.uipanel_head,'SelectedObject',handles.radiobutton_singleview);
+    set(handles.axes_left,'Position',[0.25,0.025,0.5,0.95]);
 else
     set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
+    set(handles.axes_left,'Position',[0.05,0.025,0.5,0.95]);
 end
 
 % Set solution for plotting
@@ -152,9 +154,18 @@ function uipanel_head_SelectionChangeFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if eventdata.NewValue == handles.radiobutton_singleview 
     cla(handles.axes_right)
+    cla(handles.axes_left)
+    set(handles.axes_left,'Position',[0.25,0.025,0.5,0.95]);
+     if isfield(handles,'fid_pts')
+        plot_atlas_digpts
+        plot_links
+    else
+        plot_atlas_empty
+    end
 end
 if eventdata.NewValue == handles.radiobutton_doubleview
     cla(handles.axes_left)
+    set(handles.axes_left,'Position',[0.05,0.025,0.5,0.95]);
     if isfield(handles,'fid_pts')
         plot_atlas_digpts
         plot_links
@@ -303,26 +314,12 @@ end
 % If START/STOP button is START mode, run this loop indefinitely until the button is toggled
 while ishandle(hObject) && get(hObject,'Value')
     
+    % Fill lsl_buffer (FIFO) with new data
     lsl_buffer = fill_lsl_buffer(lsl_buffer);
     
-    % Parse the data depending on the device-specific arrangement(metadata)
-    switch(get(handles.popupmenu_device,'value'))
-        case 1  % NIRx
-            
-            % RAIAN: using the SDpairs created above from metadata, extract meaningful
-            % NIRS data from the lsl_buffer and place them into matrices
-            % nirs_data1 and nirs_data2 (time x fNIRS_channels for lambda 1
-            % and 2 respectively). The channel arrangement by columns must be
-            % consistent for lambdas 1 and 2.
-            
-            % In this case, it was all channels (useful and useless
-            % combinations), but it will become smaller now
-            nirs_data1 = lsl_buffer(:,2:size(handles.src_pts,1)*size(handles.det_pts,1)+1);
-            nirs_data2 = lsl_buffer(:,size(handles.src_pts,1)*size(handles.det_pts,1)+2:end);
-            
-        case 2  % Other device
- 
-    end % End readout of incoming data
+    % Pull fNIRS signals from buffer
+    nirs_data1 = lsl_buffer(:,2:size(handles.src_pts,1)*size(handles.det_pts,1)+1);
+    nirs_data2 = lsl_buffer(:,size(handles.src_pts,1)*size(handles.det_pts,1)+2:end);
     
     % Filter everything but the cardiac component
     filtered_nirs_data1=filtfilt(B,A,nirs_data1);       % Cardiac bandwidth
@@ -336,18 +333,13 @@ while ishandle(hObject) && get(hObject,'Value')
     fpower_matrix = zeros(num_optodes,num_optodes);
     A = zeros(num_optodes,num_optodes);
     
-    % RAIAN: here we will need to loop over all optical channels described
-    % in SDpairs
+    % Compute quality metrics on each channel
     for i = 1 : size(handles.SDpairs,1)
-        % This was done with NIRX to select only the useful channels of of
-        % the total combos: no longer needed!
-        % col = (handles.SDpairs(i,1)-1)*handles.det_num + handles.SDpairs(i,2);  
-        
-        % Compute quality measures channel-by-channel
+   
+        % Compute quality measures on one channel
         [sci,psp,fpsp] = quality_metrics(filtered_nirs_data1(:,i),filtered_nirs_data2(:,i));
         
-        % Here we use SDpairs to place the measures in the right
-        % battlefield place
+        % Placing the measures in the battlefield matrix
         sci_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = sci;    % Adjust not based on machine
         power_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = psp;
         fpower_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = fpsp;
