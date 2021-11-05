@@ -75,20 +75,20 @@ function writeSingleElement(fid, currentField,currentElementValue,tabs)
         % if this is an array and not a string then iterate on every
         % element, if this is a single element write it
         if length(currentElementValue) > 1 && ~ischar(currentElementValue)
-            fprintf(fid,' "%s" : [\n%s',currentField,tabs);
+            fprintf(fid,'"%s" : [',currentField);
             for m = 1:length(currentElementValue)-1
-                writeElement(fid, currentElementValue(m),tabs);
-                fprintf(fid,',\n%s',tabs);
+                %writeElement(fid, currentElementValue(m),tabs);
+                if isnumeric(currentElementValue(m))
+                    fprintf(fid,'%g, ',currentElementValue(m));
+                end
+                %fprintf(fid,',\n%s',tabs);
+                if isempty(m)
+                    m=1;
+                else
+                  m=m+1;
+                end     
+                fprintf(fid,'%g]',currentElementValue(m));
             end
-            if isempty(m)
-                m=1;
-            else
-              m=m+1;
-            end
-            
-            writeElement(fid, currentElementValue(m),tabs);
-          
-            fprintf(fid,'\n%s]\n%s',tabs,tabs);
         elseif isstruct(currentElementValue)
             fprintf(fid,'"%s" : ',currentField);
             writeElement(fid, currentElementValue,tabs);

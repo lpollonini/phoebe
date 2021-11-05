@@ -70,36 +70,17 @@ create_tabs;
 load_atlas;
 
 %% Loads initialization parameters (last saved Phoebe settings)
-% load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-% if exist([pwd filesep 'init.mat'],'file') == 2
-%     load([pwd filesep 'init.mat']);
-%     if ~isempty(dig_pts_path) && ~exist(dig_pts_path, 'file')
-%       warningMessage = sprintf('Warning: file does not exist:\n%s', dig_pts_path);
-%       uiwait(msgbox(warningMessage));
-%       load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-%     end
-%     if ~isempty(pairings_path) && ~exist(pairings_path, 'file')
-%       warningMessage = sprintf('Warning: file does not exist:\n%s', pairings_path);
-%       uiwait(msgbox(warningMessage));
-%       load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-%     end
-% end
 
 if exist([pwd filesep 'settings.json'],'file') ~= 2
       uiwait(msgbox('File SETTINGS.JSON is missing from the root folder. If it cannot be located, please download it anew from GitHub.'));
 else
     settings = jsondecode(fileread('settings.json'));
-%         if ~isempty(dig_pts_path) && ~exist(dig_pts_path, 'file')
-%           warningMessage = sprintf('Warning: file does not exist:\n%s', dig_pts_path);
-%           uiwait(msgbox(warningMessage));
-%           load([pwd filesep 'subfunctions' filesep 'init_blank.mat']);
-%         end
 end
 handles.settings = settings;
 handles.opacity = settings.opacity;
 handles.zoom_index = settings.zoom_index;
-handles.axes_left.View = [165,10];
-handles.axes_right.View = [165,10];
+handles.axes_left.View = settings.view_left;
+handles.axes_right.View = settings.view_right;
 
 % Prepare one or two head models for plotting
 if settings.double_view==0
@@ -450,6 +431,8 @@ handles.settings.psp_threshold = str2double(get(handles.edit_spectral_threshold,
 handles.settings.min_sd_range = str2double(get(handles.min_optode_dist_edit,'String'));
 handles.settings.max_sd_range = str2double(get(handles.max_optode_dist_edit,'String'));
 handles.settings.opacity = get(handles.slider_opacity,'Value');
+handles.settings.view_left = get(handles.axes_left,'View');
+handles.settings.view_right = get(handles.axes_right,'View');
 saveJSONfile(handles.settings,'settings.json')
 %save([pwd filesep 'init.mat'],'fcut_min','fcut_max','sci_threshold','double_view','sci_window','sci_window','psp_threshold','min_sd_range','max_sd_range','opacity','-append')
 % Hint: delete(hObject) closes the figure
