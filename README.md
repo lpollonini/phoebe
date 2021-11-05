@@ -1,6 +1,6 @@
 # PHOEBE
 
-*** October 2021 UPDATE ALERT: PHOEBE is undergoing a revamp for an easier and better user experience. Stay tuned for upcoming updates! ***
+*** ***October 2021 UPDATE ALERT:*** PHOEBE is undergoing a revamp for an easier and better user experience. Stay tuned for upcoming updates! ***
 
 PHOEBE (Placing Headgear Optodes Efficiently Before Experiment) is a MATLAB GUI application that measures and displays the optical coupling between fNIRS optodes and the scalp of a subject in real time.
 
