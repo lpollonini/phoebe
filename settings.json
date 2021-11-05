@@ -5,13 +5,16 @@
 	"patriot_hemisphere" : 1,
 	"zoom_index" : 0.5,
 	"opacity" : 0.8,
-	"fcut_min" : 0.4,
-	"fcut_max" : 2.4,
-	"double_view" : 1,
+	"fcut_min" : 0.5,
+	"fcut_max" : 2.5,
+	"double_view" : 0,
 	"psp_threshold" : 0.1,
 	"sci_window" : 3,
-	"sci_threshold" : 0.7,
+	"sci_threshold" : 0.8,
 	"min_sd_range" : 15,
 	"max_sd_range" : 40,
-	"dig_pts_path" : "C:/Users/lpolloni/Digitization/ale8x8.txt"
+	"view_left" : [165, 10],
+	"view_right" : [165, 10],
+	"quality_view" : "channels",
+	"dig_pts_path" : ""
 }
