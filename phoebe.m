@@ -226,13 +226,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 return
             end
             
-            % RAIAN: Parse probe information from metadata and create a
-            % measurement list from all channels (similar to former
-            % SDpairs). Since the LSL array will contain NIRS and non-NIRS
-            % data (i.e., time, EEG, accelerometers, etc), the SDpairs will
-            % need to include at least four columns: #S, #D, #lambda,
-            % #LSL_index so to parse the data out easily down below.
-            % Alternatively, you could do #S, #D, #LSL_index_lambda1, #LSL_index_lambda2. 
+            SD = parse_fnirs_channels_nirstar(lsl_inlet);
             
         case 2  % Aurora
             %TBD
@@ -257,38 +251,37 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     num_optodes = size(handles.src_pts,1) + size(handles.det_pts,1); 
     
     % LUCA: revise this according to the optode vs. channel quality
-    % Plot filled markers, but we need the handlers h1 and h2 of optodes to update their colors below (weird)
+    % Plot filled markers, but we need the handlers h1 and h2 of optodes to update their colors below
     hold(handles.axes_left,'on')
     hold(handles.axes_right,'on')
     delete(handles.h_src_left);
     delete(handles.h_det_left);
     h1 = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
     h2 = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
+    
 %     % Might be an overkill
-    det_pts = handles.det_pts;
-    src_pts = handles.src_pts;
-    % idx_min_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_min_optode_distance,'String')));
-    % idx_max_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_max_optode_distance,'String')));
-    idx_min_cell=sd_rangesearch(det_pts,src_pts,20);
-    idx_max_cell=sd_rangesearch(det_pts,src_pts,50);
-    for i = 1:size(idx_max_cell,1)
-        idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
-    end
-    row=1;
-    SDpairs=[];
-    for i=1:size(src_pts,1)
-        det_conn=sort(idx{i,1});
-        for j=1:length(det_conn)
-            SDpairs(row,:)=[i det_conn(j) 1 1];
-            row=row+1;
-        end
-    end
-    px = zeros(2,size(SDpairs,1));
-    py = zeros(2,size(SDpairs,1));
-    pz = zeros(2,size(SDpairs,1));
-    for i=1:size(SDpairs,1)
-        p1 = handles.src_pts(SDpairs(i,1),:);
-        p2 = handles.det_pts(SDpairs(i,2),:);
+%     det_pts = handles.det_pts;
+%     src_pts = handles.src_pts;
+%     idx_min_cell=sd_rangesearch(det_pts,src_pts,20);
+%     idx_max_cell=sd_rangesearch(det_pts,src_pts,50);
+%     for i = 1:size(idx_max_cell,1)
+%         idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
+%     end
+%     row=1;
+%     SDpairs=[];
+%     for i=1:size(src_pts,1)
+%         det_conn=sort(idx{i,1});
+%         for j=1:length(det_conn)
+%             SDpairs(row,:)=[i det_conn(j) 1 1];
+%             row=row+1;
+%         end
+%     end
+    px = zeros(2,size(SD,1));
+    py = zeros(2,size(SD,1));
+    pz = zeros(2,size(SD,1));
+    for i=1:size(SD,1)
+        p1 = handles.src_pts(SD(i,1),:);
+        p2 = handles.det_pts(SD(i,2),:);
         px(:,i) = [p1(1);p2(1)];
         py(:,i) = [p1(2);p2(2)];
         pz(:,i) = [p1(3);p2(3)];
@@ -318,8 +311,8 @@ while ishandle(hObject) && get(hObject,'Value')
     lsl_buffer = fill_lsl_buffer(lsl_buffer);
     
     % Pull fNIRS signals from buffer
-    nirs_data1 = lsl_buffer(:,2:size(handles.src_pts,1)*size(handles.det_pts,1)+1);
-    nirs_data2 = lsl_buffer(:,size(handles.src_pts,1)*size(handles.det_pts,1)+2:end);
+    nirs_data1 = lsl_buffer(:,SD(:,3));
+    nirs_data2 = lsl_buffer(:,SD(:,4));
     
     % Filter everything but the cardiac component
     filtered_nirs_data1=filtfilt(B,A,nirs_data1);       % Cardiac bandwidth
@@ -373,11 +366,20 @@ while ishandle(hObject) && get(hObject,'Value')
         end
         drawnow
     else %channel solution
-%         [row,col] = find(W(1:size(handles.src_pts,1),size(handles.src_pts,1)+1:end));
-%         col = col - size(handles.src_pts,1);
-%         for i = 1:length(row)
-%             
-%         end
+        % Compute quality metrics on each channel
+        for i = 1 : size(SD,1)
+            if W(SD(i,1),size(handles.det_pts,1)+SD(i,1))
+                set(hl1(i),'Color','g')
+                if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+                    set(hl2(i),'Color','g')
+                end
+            else
+                set(hl1(i),'Color','r')
+                if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+                    set(hl2(i),'Color','r')
+                end
+            end
+        end
         drawnow
     end
 end
