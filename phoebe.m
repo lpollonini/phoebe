@@ -226,7 +226,9 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 return
             end
             
-            SD = parse_fnirs_channels_nirstar(lsl_inlet);
+            SD = parse_fnirs_channels_nirstar(inlet);
+            handles.src_pts = parse_source_coordinates_nirstar(inlet);
+            handles.det_pts = parse_detector_coordinates_nirstar(inlet);
             
         case 2  % Aurora
             %TBD
@@ -256,8 +258,12 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     hold(handles.axes_right,'on')
     delete(handles.h_src_left);
     delete(handles.h_det_left);
+    delete(handles.h_txt_src_left);
+    delete(handles.h_txt_det_left);
+    delete(handles.h_links_left);
     h1 = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
     h2 = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
+    
     
 %     % Might be an overkill
 %     det_pts = handles.det_pts;
@@ -290,9 +296,12 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     if get(handles.uipanel_head,'SelectedObject') == handles.radiobutton_doubleview
         delete(handles.h_src_right);
         delete(handles.h_det_right);
+        delete(handles.h_txt_src_right);
+        delete(handles.h_txt_det_right);
+        delete(handles.h_links_right);
         h3=scatter3(handles.axes_right,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
         h4=scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2); 
-        hl2 = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
+        hl2 = line(handles.axes_right,px,py,pz,'Color','y','LineWidth',3);
     end
     
     % Reads the filter parameters from panel and computes bandpass coeffs
@@ -302,13 +311,19 @@ else % Stops monitoring
     set(handles.togglebutton_scan,'String','START MONITOR');
     set(handles.radiobutton_singleview,'Enable','on');
     set(handles.radiobutton_doubleview,'Enable','on');
+%     handles.h_src_left = h1;
+%     handles.h_det_left = h2;
+%     delete(handles.h_txt_src_left);
+%     delete(handles.h_txt_det_left);
+%     delete(handles.h_links_left);
+    guidata(hObject,handles);
 end
 
 % If START/STOP button is START mode, run this loop indefinitely until the button is toggled
 while ishandle(hObject) && get(hObject,'Value')
     
     % Fill lsl_buffer (FIFO) with new data
-    lsl_buffer = fill_lsl_buffer(lsl_buffer);
+    lsl_buffer = fill_lsl_buffer(inlet,lsl_buffer);
     
     % Pull fNIRS signals from buffer
     nirs_data1 = lsl_buffer(:,SD(:,3));
@@ -324,26 +339,36 @@ while ishandle(hObject) && get(hObject,'Value')
     sci_matrix = zeros(num_optodes,num_optodes);    % Number of optode is from the user's layout, not the machine, hence we may want to check for consistency here?
     power_matrix = zeros(num_optodes,num_optodes);
     fpower_matrix = zeros(num_optodes,num_optodes);
-    A = zeros(num_optodes,num_optodes);
+    A_matrix = zeros(num_optodes,num_optodes);
     
-    % Compute quality metrics on each channel
-    for i = 1 : size(handles.SDpairs,1)
+    
+     % Compute quality metrics on each channel
+    for i = 1 : size(SD,1)
    
         % Compute quality measures on one channel
-        [sci,psp,fpsp] = quality_metrics(filtered_nirs_data1(:,i),filtered_nirs_data2(:,i));
+        %[sci,psp,fpsp] = quality_metrics(handles,filtered_nirs_data1(:,i),filtered_nirs_data2(:,i));
+        %[sci,psp,fpsp] = quality_metrics(handles,nirs_data1(:,i),nirs_data2(:,i));
+        if nirs_data1(1,i) > 0.5
+            sci=1;
+            psp=1;
+        else
+            sci=0;
+            psp=0;
+        end
+        fpsp=0;
         
         % Placing the measures in the battlefield matrix
-        sci_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = sci;    % Adjust not based on machine
-        power_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = psp;
-        fpower_matrix(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = fpsp;
-        A(handles.SDpairs(i,1),handles.src_num+handles.SDpairs(i,2)) = 1;   % Adjacency matrix: marks all the active pairs with 1, rest is 0
+        sci_matrix(SD(i,1),size(handles.src_pts,1)+SD(i,2)) = sci;    % Adjust not based on machine
+        power_matrix(SD(i,1),size(handles.src_pts,1)+SD(i,2)) = psp;
+        fpower_matrix(SD(i,1),size(handles.src_pts,1)+SD(i,2)) = fpsp;
+        A_matrix(SD(i,1),size(handles.src_pts,1)+SD(i,2)) = 1;   % Adjacency matrix: marks all the active pairs with 1, rest is 0
     end
     
     % Weight boolean matrix: here we set the criteria for passing thresholds
     W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) & (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); 
     
     % Display results at the optode level or the channel level
-    if get(handles.radiobutton_qoptode,'Value',1)
+    if get(handles.radiobutton_qoptode,'Value')
         % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
         [optodes_status] = boolean_system(num_optodes,A,W); 
         optodes_color = zeros(length(optodes_status),3);
@@ -368,7 +393,7 @@ while ishandle(hObject) && get(hObject,'Value')
     else %channel solution
         % Compute quality metrics on each channel
         for i = 1 : size(SD,1)
-            if W(SD(i,1),size(handles.det_pts,1)+SD(i,1))
+            if W(SD(i,1),size(handles.src_pts,1)+SD(i,2))
                 set(hl1(i),'Color','g')
                 if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
                     set(hl2(i),'Color','g')

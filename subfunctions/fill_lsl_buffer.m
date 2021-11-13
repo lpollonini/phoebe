@@ -1,4 +1,4 @@
-function [lsl_buffer] = fill_lsl_buffer(lsl_buffer)
+function [lsl_buffer] = fill_lsl_buffer(inlet,lsl_buffer)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 % Read a chunk of data and fill the buffer (all devices)

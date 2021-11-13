@@ -1,4 +1,4 @@
-function [sci,psp,fpsp] = quality_metrics(signal1,signal2)
+function [sci,psp,fpsp] = quality_metrics(handles,signal1,signal2)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 

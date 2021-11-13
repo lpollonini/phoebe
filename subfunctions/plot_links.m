@@ -14,8 +14,6 @@
 
 det_pts = handles.det_pts;
 src_pts = handles.src_pts;
-% idx_min_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_min_optode_distance,'String')));
-% idx_max_cell=sd_rangesearch(det_pts,src_pts,str2double(get(handles.edit_max_optode_distance,'String')));
 idx_min_cell=sd_rangesearch(det_pts,src_pts,20);
 idx_max_cell=sd_rangesearch(det_pts,src_pts,50);
 for i = 1:size(idx_max_cell,1)
@@ -40,7 +38,7 @@ for i=1:size(SDpairs,1)
     py(:,i) = [p1(2);p2(2)];
     pz(:,i) = [p1(3);p2(3)];
 end
-line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3)
+handles.h_links_left = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
 % rotate3d on
 % If double view, do the same on the right head
 if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview 
@@ -57,7 +55,7 @@ if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
 %     handles.h_det_right = scatter3(handles.axes_right,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3),60,'b','s');
 %     text(handles.axes_right,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r')
 %     text(handles.axes_right,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b')
-    line(handles.axes_right,px,py,pz,'Color','y','LineWidth',3)
+    handles.h_links_right = line(handles.axes_right,px,py,pz,'Color','y','LineWidth',3);
 %     rotate3d on
 else
     set(handles.axes_right,'Visible','off');

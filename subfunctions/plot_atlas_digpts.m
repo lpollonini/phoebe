@@ -13,8 +13,8 @@ handles.h_light_left = light;
 lightangle(handles.h_light_left, current_view(1),current_view(2))
 handles.h_src_left = scatter3(handles.axes_left,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3),80,'r','fill','SizeData',60,'LineWidth',2); % Plots sources
 handles.h_det_left = scatter3(handles.axes_left,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3),80,'b','fill','s','SizeData',60,'LineWidth',2); % Plots detectors
-text(handles.axes_left,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold') % Labels sources
-text(handles.axes_left,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b','FontSize',15,'FontWeight','bold') % Labels detectors
+handles.h_txt_src_left = text(handles.axes_left,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold'); % Labels sources
+handles.h_txt_det_left = text(handles.axes_left,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b','FontSize',15,'FontWeight','bold'); % Labels detectors
 h_rot3d = rotate3d;
 h_rot3d.ActionPostCallback = @rot3dcallback;
 h_rot3d.Enable = 'on';
@@ -35,8 +35,8 @@ if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
     lightangle(handles.h_light_right, current_view(1),current_view(2))
     handles.h_src_right = scatter3(handles.axes_right,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2); 
     handles.h_det_right = scatter3(handles.axes_right,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
-    text(handles.axes_right,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold')
-    text(handles.axes_right,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b','FontSize',15,'FontWeight','bold')
+    handles.h_txt_src_right = text(handles.axes_right,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold');
+    handles.h_txt_det_right = text(handles.axes_right,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b','FontSize',15,'FontWeight','bold');
     rotate3d on
 else
     set(handles.axes_right,'Visible','off');
