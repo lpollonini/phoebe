@@ -252,36 +252,17 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     % Computes total optodes based on loaded probe 
     num_optodes = size(handles.src_pts,1) + size(handles.det_pts,1); 
     
-    % LUCA: revise this according to the optode vs. channel quality
-    % Plot filled markers, but we need the handlers h1 and h2 of optodes to update their colors below
-    hold(handles.axes_left,'on')
+    % Plot filled markers in red and blue
     hold(handles.axes_right,'on')
     delete(handles.h_src_left);
     delete(handles.h_det_left);
     delete(handles.h_txt_src_left);
     delete(handles.h_txt_det_left);
     delete(handles.h_links_left);
-    h1 = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
-    h2 = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
+    h_src_left = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
+    h_det_left = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
     
-    
-%     % Might be an overkill
-%     det_pts = handles.det_pts;
-%     src_pts = handles.src_pts;
-%     idx_min_cell=sd_rangesearch(det_pts,src_pts,20);
-%     idx_max_cell=sd_rangesearch(det_pts,src_pts,50);
-%     for i = 1:size(idx_max_cell,1)
-%         idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
-%     end
-%     row=1;
-%     SDpairs=[];
-%     for i=1:size(src_pts,1)
-%         det_conn=sort(idx{i,1});
-%         for j=1:length(det_conn)
-%             SDpairs(row,:)=[i det_conn(j) 1 1];
-%             row=row+1;
-%         end
-%     end
+    % Plot links in yellow
     px = zeros(2,size(SD,1));
     py = zeros(2,size(SD,1));
     pz = zeros(2,size(SD,1));
@@ -292,16 +273,17 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
         py(:,i) = [p1(2);p2(2)];
         pz(:,i) = [p1(3);p2(3)];
     end
-    hl1 = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
+    h_links_left = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
+    % Do the same for right axes 
     if get(handles.uipanel_head,'SelectedObject') == handles.radiobutton_doubleview
         delete(handles.h_src_right);
         delete(handles.h_det_right);
         delete(handles.h_txt_src_right);
         delete(handles.h_txt_det_right);
         delete(handles.h_links_right);
-        h3=scatter3(handles.axes_right,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
-        h4=scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2); 
-        hl2 = line(handles.axes_right,px,py,pz,'Color','y','LineWidth',3);
+        h_src_right = scatter3(handles.axes_right,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
+        h_det_right = scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2); 
+        h_links_right = line(handles.axes_right,px,py,pz,'Color','y','LineWidth',3);
     end
     
     % Reads the filter parameters from panel and computes bandpass coeffs
@@ -341,21 +323,11 @@ while ishandle(hObject) && get(hObject,'Value')
     fpower_matrix = zeros(num_optodes,num_optodes);
     A_matrix = zeros(num_optodes,num_optodes);
     
-    
      % Compute quality metrics on each channel
     for i = 1 : size(SD,1)
    
         % Compute quality measures on one channel
-        %[sci,psp,fpsp] = quality_metrics(handles,filtered_nirs_data1(:,i),filtered_nirs_data2(:,i));
-        %[sci,psp,fpsp] = quality_metrics(handles,nirs_data1(:,i),nirs_data2(:,i));
-        if nirs_data1(1,i) > 0.5
-            sci=1;
-            psp=1;
-        else
-            sci=0;
-            psp=0;
-        end
-        fpsp=0;
+        [sci,psp,fpsp] = quality_metrics(handles,filtered_nirs_data1(:,i),filtered_nirs_data2(:,i));
         
         % Placing the measures in the battlefield matrix
         sci_matrix(SD(i,1),size(handles.src_pts,1)+SD(i,2)) = sci;    % Adjust not based on machine
@@ -383,25 +355,25 @@ while ishandle(hObject) && get(hObject,'Value')
             end
         end
         % Update optodes graphics
-        set(h1,'CData',optodes_color(1:handles.src_num,:));
-        set(h2,'CData',optodes_color(handles.src_num+1:end,:));
+        set(h_src_left,'CData',optodes_color(1:handles.src_num,:));
+        set(h_det_left,'CData',optodes_color(handles.src_num+1:end,:));
         if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-            set(h3,'CData',optodes_color(1:handles.src_num,:));
-            set(h4,'CData',optodes_color(handles.src_num+1:end,:));
+            set(h_src_right,'CData',optodes_color(1:handles.src_num,:));
+            set(h_det_right,'CData',optodes_color(handles.src_num+1:end,:));
         end
         drawnow
-    else %channel solution
-        % Compute quality metrics on each channel
+        
+    else % Channel solution: update links color
         for i = 1 : size(SD,1)
             if W(SD(i,1),size(handles.src_pts,1)+SD(i,2))
-                set(hl1(i),'Color','g')
+                set(h_links_left(i),'Color','g')
                 if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                    set(hl2(i),'Color','g')
+                    set(h_links_right(i),'Color','g')
                 end
             else
-                set(hl1(i),'Color','r')
+                set(h_links_left(i),'Color','r')
                 if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                    set(hl2(i),'Color','r')
+                    set(h_links_right(i),'Color','r')
                 end
             end
         end
