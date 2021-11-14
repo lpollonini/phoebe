@@ -407,7 +407,7 @@ handles.settings.max_sd_range = str2double(get(handles.max_optode_dist_edit,'Str
 handles.settings.opacity = get(handles.slider_opacity,'Value');
 handles.settings.view_left = get(handles.axes_left,'View');
 handles.settings.view_right = get(handles.axes_right,'View');
-saveJSONfile(handles.settings,'settings.json')
+saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
 %save([pwd filesep 'init.mat'],'fcut_min','fcut_max','sci_threshold','double_view','sci_window','sci_window','psp_threshold','min_sd_range','max_sd_range','opacity','-append')
 % Hint: delete(hObject) closes the figure
 if ~isempty(instrfind)
@@ -471,7 +471,7 @@ dig_pts_path = [PathName FileName];
 idx_slash = strfind(dig_pts_path,'\');
 dig_pts_path(idx_slash) = '/';
 handles.settings.dig_pts_path = dig_pts_path;
-saveJSONfile(handles.settings,'settings.json')
+saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
 handles.dig_pts_path = dig_pts_path;
 % choice = questdlg({'Do you have a source-detector pairings file (Homer format) to be used as default?','If not, it will be created for you based on the S-D euclidean distance.'},'Digitized Optodes','Yes','No','Yes');
 % if strcmp(choice,'Yes')
