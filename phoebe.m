@@ -408,7 +408,6 @@ handles.settings.opacity = get(handles.slider_opacity,'Value');
 handles.settings.view_left = get(handles.axes_left,'View');
 handles.settings.view_right = get(handles.axes_right,'View');
 saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
-%save([pwd filesep 'init.mat'],'fcut_min','fcut_max','sci_threshold','double_view','sci_window','sci_window','psp_threshold','min_sd_range','max_sd_range','opacity','-append')
 % Hint: delete(hObject) closes the figure
 if ~isempty(instrfind)
     fclose(instrfind)

@@ -353,50 +353,51 @@ for i=1:nd
     fprintf(fileID,'d%d: %.1f %.1f %.1f\n',i,det_pts(i,1),det_pts(i,2),det_pts(i,3));
 end
 fclose(fileID);
-dig_pts_path = [PathName FileName];
+handles.dig_pts_path = [PathName FileName];
 
-% Compute and save pairings file and make it the new default.
-min_pts_range = str2double(get(handles.min_optode_dist_edit,'String'));
-max_pts_range = str2double(get(handles.max_optode_dist_edit,'String'));
-idx_min_cell=sd_rangesearch(det_pts,src_pts,min_pts_range);
-idx_max_cell=sd_rangesearch(det_pts,src_pts,max_pts_range);
-for i = 1:size(idx_max_cell,1)
-    idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
-end
-row=1;
-MeasList=[];
-for i=1:ns
-    det_conn=sort(idx{i,1});
-    for j=1:length(det_conn)
-        MeasList(row,:)=[i det_conn(j) 1 1];
-        row=row+1;
-    end
-end
-% convert for NIRS toolbox format
-SD.SrcPos = src_pts;
-SD.DetPos = det_pts;
-SD.nSrcs = ns;
-SD.nDets = nd;
-if ~isempty(MeasList)
-    MeasList2 = MeasList;
-    MeasList2(:,4) = 2;
-    SD.MeasList = [MeasList; MeasList2];
-    for i=1:size(SD.MeasList,1)
-        p1 = handles.src_pts(SD.MeasList(i,1),:);
-        p2 = handles.det_pts(SD.MeasList(i,2),:);
-        p = [p1;p2];
-        line(handles.axes_left,p(:,1),p(:,2),p(:,3),'Color','y');
-        line(handles.axes_right,p(:,1),p(:,2),p(:,3),'Color','y');
-    end
-else
-    SD.MeasList = [];
-    warndlg('Empty pairings');
-end
-pairings_path = [PathName FileName(1:end-4) '.SD'];
-save(pairings_path,'SD');
+% % Compute and save pairings file and make it the new default.
+% min_pts_range = str2double(get(handles.min_optode_dist_edit,'String'));
+% max_pts_range = str2double(get(handles.max_optode_dist_edit,'String'));
+% idx_min_cell=sd_rangesearch(det_pts,src_pts,min_pts_range);
+% idx_max_cell=sd_rangesearch(det_pts,src_pts,max_pts_range);
+% for i = 1:size(idx_max_cell,1)
+%     idx{i,1}=setdiff(idx_max_cell{i,1},idx_min_cell{i,1});
+% end
+% row=1;
+% MeasList=[];
+% for i=1:ns
+%     det_conn=sort(idx{i,1});
+%     for j=1:length(det_conn)
+%         MeasList(row,:)=[i det_conn(j) 1 1];
+%         row=row+1;
+%     end
+% end
+% % convert for NIRS toolbox format
+% SD.SrcPos = src_pts;
+% SD.DetPos = det_pts;
+% SD.nSrcs = ns;
+% SD.nDets = nd;
+% if ~isempty(MeasList)
+%     MeasList2 = MeasList;
+%     MeasList2(:,4) = 2;
+%     SD.MeasList = [MeasList; MeasList2];
+%     for i=1:size(SD.MeasList,1)
+%         p1 = handles.src_pts(SD.MeasList(i,1),:);
+%         p2 = handles.det_pts(SD.MeasList(i,2),:);
+%         p = [p1;p2];
+%         line(handles.axes_left,p(:,1),p(:,2),p(:,3),'Color','y');
+%         line(handles.axes_right,p(:,1),p(:,2),p(:,3),'Color','y');
+%     end
+% else
+%     SD.MeasList = [];
+%     warndlg('Empty pairings');
+% end
+% pairings_path = [PathName FileName(1:end-4) '.SD'];
+% save(pairings_path,'SD');
     
-% Update init.mat
-save([pwd filesep 'init.mat'],'baud_rate','com_port','max_pts_range','min_pts_range','dig_pts_path','pairings_path','-append');
+% Update settings.json
+%save([pwd filesep 'init.mat'],'baud_rate','com_port','max_pts_range','min_pts_range','dig_pts_path','pairings_path','-append');
+saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
 set(handles.pushbutton_digitize,'Enable','on');
 
 % If something went wrong, display error message and close serial object
