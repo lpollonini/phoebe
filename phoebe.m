@@ -466,30 +466,18 @@ set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview);
 cla(handles.axes_left);
 cla(handles.axes_right);
 [FileName,PathName] = uigetfile('*.txt','Select the subject digitization file','C:\Users\owner\Desktop\Digitization\*.txt');
-dig_pts_path = [PathName FileName];
-idx_slash = strfind(dig_pts_path,'\');
-dig_pts_path(idx_slash) = '/';
-handles.settings.dig_pts_path = dig_pts_path;
-saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
-handles.dig_pts_path = dig_pts_path;
-% choice = questdlg({'Do you have a source-detector pairings file (Homer format) to be used as default?','If not, it will be created for you based on the S-D euclidean distance.'},'Digitized Optodes','Yes','No','Yes');
-% if strcmp(choice,'Yes')
-%     [FileName,PathName] = uigetfile('*.SD','Select the optodes pairings file',[PathName '*.SD']);
-%     load([PathName FileName],'-mat');
-%     % maybe a sanity check to see if digitization and SD pairs go along?
-%     pairings_path = [PathName FileName];
-%     save([pwd filesep 'init.mat'],'pairings_path','-append')
-%     handles.pairings_path = pairings_path;
-% else
-%     guidata(hObject, handles);
-%     uiwait(create_pairings(handles))
-%     handles_main = findobj('Tag','figure_main');
-%     handles = guidata(handles_main);
-% end
-handles = load_dig_pts(handles,handles.dig_pts_path);  % Import digitized layout and transform into atlas space
-plot_atlas_digpts
-plot_links
-guidata(hObject, handles);
+if FileName
+    dig_pts_path = [PathName FileName];
+    idx_slash = strfind(dig_pts_path,'\');
+    dig_pts_path(idx_slash) = '/';
+    handles.settings.dig_pts_path = dig_pts_path;
+    saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
+    handles.dig_pts_path = dig_pts_path;
+    handles = load_dig_pts(handles,handles.dig_pts_path);  % Import digitized layout and transform into atlas space
+    plot_atlas_digpts
+    plot_links
+    guidata(hObject, handles);
+end
 
 
 %% MENU TOOLS -> CONVERT PATRIOT TO MNI
@@ -506,10 +494,16 @@ else
     current_dig_pts_path = [pwd filesep '*.txt'];
 end
 [FileName,PathName] = uigetfile('*.txt','Select the digitization file',current_dig_pts_path);
+if not(FileName)
+    return
+end
 dig_pts_path = [PathName FileName];
 handles = load_dig_pts(handles,dig_pts_path);  % Import digitized layout and transform into atlas space
 
 [FileName,PathName] = uiputfile('*.txt','Saving the subject digitization file',[PathName FileName(1:end-4) '_mni.txt']);
+if not(FileName)
+    return
+end
 fileID = fopen([PathName FileName],'w');
 fprintf(fileID,'nz: %.1f %.1f %.1f\n',handles.fid_pts(1,1),handles.fid_pts(1,2),handles.fid_pts(1,3));
 fprintf(fileID,'ar: %.1f %.1f %.1f\n',handles.fid_pts(2,1),handles.fid_pts(2,2),handles.fid_pts(2,3));
