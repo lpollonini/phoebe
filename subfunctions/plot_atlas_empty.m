@@ -2,6 +2,7 @@ set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview); % Alw
 cla(handles.axes_left);
 cla(handles.axes_right);
 plot_mesh(handles.axes_left,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity);
+plot_mesh(handles.axes_left,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1);
 hold(handles.axes_left,'on')
 scatter3(handles.axes_left,handles.atlas_fid_pts(:,1), handles.atlas_fid_pts(:,2), handles.atlas_fid_pts(:,3), 20,'y','fill'); % Plot atlas fiducials    axis([-130 130 -230 130 -100 150]) % FIX Automatic setting to fit large head or tall optodes
 set(handles.axes_left,'XLim',[-90-80*handles.zoom_index 90+80*handles.zoom_index])
