@@ -427,11 +427,12 @@ function slider_opacity_Callback(hObject, ~, handles)
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 handles.opacity = get(hObject,'Value');
-cla(handles.axes_left);
-cla(handles.axes_right);
+
 if isfield(handles,'fid_pts')
-    plot_atlas_digpts;
-    plot_links
+    set(handles.h_scalp_left,'FaceAlpha',handles.opacity)
+    if ~isempty(allchild(handles.axes_right))
+        set(handles.h_scalp_right,'FaceAlpha',handles.opacity)
+    end
 else
     plot_atlas_empty;
 end
@@ -448,11 +449,16 @@ function slider_zoom_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 handles.zoom_index = 1 - get(hObject,'Value');
-cla(handles.axes_left);
-cla(handles.axes_right);
 if isfield(handles,'fid_pts')
-    plot_atlas_digpts;
-    plot_links
+    set(handles.axes_left,'XLim',[-90-80*handles.zoom_index 90+80*handles.zoom_index])
+    set(handles.axes_left,'YLim',[-120-200*handles.zoom_index 90+130*handles.zoom_index])
+    set(handles.axes_left,'ZLim',[-70-60*handles.zoom_index 100+200*handles.zoom_index])
+    if ~isempty(allchild(handles.axes_right))
+        set(handles.axes_right,'XLim',[-90-80*handles.zoom_index 90+80*handles.zoom_index])
+        set(handles.axes_right,'YLim',[-120-200*handles.zoom_index 90+130*handles.zoom_index])
+        set(handles.axes_right,'ZLim',[-70-60*handles.zoom_index 100+200*handles.zoom_index])
+    end
+    
 else
     plot_atlas_empty;
 end
