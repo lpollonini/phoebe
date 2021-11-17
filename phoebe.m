@@ -153,25 +153,13 @@ function uipanel_head_SelectionChangeFcn(hObject, eventdata, handles)
 %	NewValue: handle of the currently selected object
 % handles    structure with handles and user data (see GUIDATA)
 if eventdata.NewValue == handles.radiobutton_singleview 
-    cla(handles.axes_right)
-    cla(handles.axes_left)
     set(handles.axes_left,'Position',[0.25,0.025,0.5,0.95]);
-     if isfield(handles,'fid_pts')
-        plot_atlas_digpts
-        plot_links
-    else
-        plot_atlas_empty
-    end
+    set(findall(handles.axes_right),'Visible','off');
 end
 if eventdata.NewValue == handles.radiobutton_doubleview
-    cla(handles.axes_left)
     set(handles.axes_left,'Position',[0.05,0.025,0.5,0.95]);
-    if isfield(handles,'fid_pts')
-        plot_atlas_digpts
-        plot_links
-    else
-        plot_atlas_empty
-    end
+    set(findall(handles.axes_right),'Visible','on');
+    set(handles.axes_right,'Visible','off');
 end
 hold(handles.axes_right,'off')
 set(handles.togglebutton_scan,'String','START MONITOR');
