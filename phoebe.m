@@ -185,7 +185,7 @@ function togglebutton_scan_Callback(hObject, ~, handles, FileName, PathName)
 
 if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL preparation steps
     %Update some graphics
-    set(handles.togglebutton_scan,'String','STOP MONITORING QUALITY');
+    set(handles.togglebutton_scan,'String','STOP MONITORING');
     set(handles.radiobutton_singleview,'Enable','off');
     set(handles.radiobutton_doubleview,'Enable','off');
     drawnow
@@ -206,7 +206,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 [~,~] = inlet.pull_chunk();
             else
                 uiwait(warndlg('Please PREVIEW or RECORD data in NIRStar and ensure that the LSL streaming is active','PHOEBE'))
-                set(handles.togglebutton_scan,'String','START MONITORING QUALITY');
+                set(handles.togglebutton_scan,'String','START MONITORING');
                 set(handles.togglebutton_scan,'Value',0);
                 set(handles.radiobutton_singleview,'Enable','on');
                 set(handles.radiobutton_doubleview,'Enable','on');
@@ -334,7 +334,7 @@ while ishandle(hObject) && get(hObject,'Value')
     % Display results at the optode level or the channel level
     if get(handles.radiobutton_qoptode,'Value')
         % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
-        [optodes_status] = boolean_system(num_optodes,A,W); 
+        [optodes_status] = boolean_system(num_optodes,A_matrix,W); 
         optodes_color = zeros(length(optodes_status),3);
         for i=1:length(optodes_status)
             switch(optodes_status(i))
@@ -347,11 +347,11 @@ while ishandle(hObject) && get(hObject,'Value')
             end
         end
         % Update optodes graphics
-        set(h_src_left,'CData',optodes_color(1:handles.src_num,:));
-        set(h_det_left,'CData',optodes_color(handles.src_num+1:end,:));
+        set(h_src_left,'CData',optodes_color(1:size(handles.src_pts,1),:));
+        set(h_det_left,'CData',optodes_color(size(handles.src_pts,1)+1:end,:));
         if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-            set(h_src_right,'CData',optodes_color(1:handles.src_num,:));
-            set(h_det_right,'CData',optodes_color(handles.src_num+1:end,:));
+            set(h_src_right,'CData',optodes_color(1:size(handles.src_pts,1),:));
+            set(h_det_right,'CData',optodes_color(size(handles.src_pts,1)+1:end,:));
         end
         drawnow
         
