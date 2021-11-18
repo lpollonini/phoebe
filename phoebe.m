@@ -193,7 +193,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     % Load LSL library
     lib = lsl_loadlib(); 
     if isempty(lib)
-       uiwait(msgbox('LSL library not loaded. Please ensure that the subfolder is included in the MATLAB path.','PHOEBE','error'));
+       uiwait(msgbox(sprintf('LSL library not loaded.\n\nPlease ensure that the subfolder is included in the MATLAB path.'),'PHOEBE','error'));
        return
     end
     
@@ -205,7 +205,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 inlet = lsl_inlet(result{1});
                 [~,~] = inlet.pull_chunk();
             else
-                uiwait(warndlg('Please PREVIEW or RECORD data in NIRStar and ensure that the LSL streaming is active','PHOEBE'))
+                uiwait(warndlg(sprintf('LSL stream not found.\n\nPlease PREVIEW or RECORD data in NIRStar and ensure that the LSL streaming is active'),'PHOEBE'))
                 set(handles.togglebutton_scan,'String','START MONITORING');
                 set(handles.togglebutton_scan,'Value',0);
                 set(handles.radiobutton_singleview,'Enable','on');
