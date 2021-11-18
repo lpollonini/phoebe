@@ -24,7 +24,7 @@ function varargout = phoebe(varargin)
 
 % Edit the above text to modify the response to help phoebe
 
-% Last Modified by GUIDE v2.5 18-Nov-2021 12:25:51
+% Last Modified by GUIDE v2.5 18-Nov-2021 15:21:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -664,3 +664,89 @@ function menu_probe_load_empty_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 plot_atlas_empty
+
+
+% --- Executes on slider movement.
+function slider_sci_threshold_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_sci_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+Value = round(get(hObject, 'Value'),2);
+set(hObject, 'Value', Value);
+set(handles.edit_threshold,'String',num2str(get(hObject,'Value')));
+
+
+% --- Executes during object creation, after setting all properties.
+function slider_sci_threshold_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_sci_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function slider_psp_threshold_Callback(hObject, eventdata, handles)
+% hObject    handle to slider_psp_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+Value = round(get(hObject, 'Value'),2)
+set(hObject, 'Value', Value);
+set(handles.edit_spectral_threshold,'String',num2str(get(hObject,'Value')))
+
+% --- Executes during object creation, after setting all properties.
+function slider_psp_threshold_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider_psp_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over slider_sci_threshold.
+function slider_sci_threshold_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to slider_sci_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+
+
+function edit_threshold_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_threshold as text
+%        str2double(get(hObject,'String')) returns contents of edit_threshold as a double
+
+set(handles.slider_sci_threshold,'Value',str2double(get(hObject,'String')))
+
+
+
+
+function edit_spectral_threshold_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_spectral_threshold (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_spectral_threshold as text
+%        str2double(get(hObject,'String')) returns contents of edit_spectral_threshold as a double
+
+set(handles.slider_psp_threshold,'Value',str2double(get(hObject,'String')))
