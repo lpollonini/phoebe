@@ -242,11 +242,13 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     
     % Plot filled markers in red and blue
     hold(handles.axes_right,'on')
-    delete(handles.h_src_left);
-    delete(handles.h_det_left);
-    delete(handles.h_txt_src_left);
-    delete(handles.h_txt_det_left);
-    delete(handles.h_links_left);
+    if ~exist('handles.h_src_left','var')
+        delete(handles.h_src_left);
+        delete(handles.h_det_left);
+        delete(handles.h_txt_src_left);
+        delete(handles.h_txt_det_left);
+        delete(handles.h_links_left);
+    end
     h_src_left = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
     h_det_left = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
     h_txt_src_left = text(handles.axes_left,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold'); % Labels sources
