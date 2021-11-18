@@ -24,7 +24,7 @@ function varargout = phoebe(varargin)
 
 % Edit the above text to modify the response to help phoebe
 
-% Last Modified by GUIDE v2.5 03-Nov-2021 16:14:08
+% Last Modified by GUIDE v2.5 18-Nov-2021 12:25:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -653,3 +653,12 @@ function radiobutton9_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of radiobutton9
+
+
+% --------------------------------------------------------------------
+function menu_probe_load_empty_Callback(hObject, eventdata, handles)
+% hObject    handle to menu_probe_load_empty (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+plot_atlas_empty
