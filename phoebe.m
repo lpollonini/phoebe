@@ -249,6 +249,8 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     delete(handles.h_links_left);
     h_src_left = scatter3(handles.axes_left,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
     h_det_left = scatter3(handles.axes_left,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2);
+    h_txt_src_left = text(handles.axes_left,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold'); % Labels sources
+    h_txt_det_left = text(handles.axes_left,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b','FontSize',15,'FontWeight','bold'); % Labels detectors
     
     % Plot links in yellow
     px = zeros(2,size(SD,1));
@@ -271,6 +273,8 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
         delete(handles.h_links_right);
         h_src_right = scatter3(handles.axes_right,handles.src_pts(:,1),handles.src_pts(:,2),handles.src_pts(:,3),60,'r','fill','SizeData',60,'LineWidth',2);
         h_det_right = scatter3(handles.axes_right,handles.det_pts(:,1),handles.det_pts(:,2),handles.det_pts(:,3),60,'b','fill','s','SizeData',60,'LineWidth',2); 
+        h_txt_src_right = text(handles.axes_right,handles.src_pts(:,1), handles.src_pts(:,2), handles.src_pts(:,3), [repmat('  ',[size(handles.src_pts,1) 1]) num2str((1:size(handles.src_pts,1))','%d')],'Color','r','FontSize',15,'FontWeight','bold');
+        h_txt_det_right = text(handles.axes_right,handles.det_pts(:,1), handles.det_pts(:,2), handles.det_pts(:,3), [repmat('  ',[size(handles.det_pts,1) 1]) num2str((1:size(handles.det_pts,1))','%d')],'Color','b','FontSize',15,'FontWeight','bold');
         h_links_right = line(handles.axes_right,px,py,pz,'Color','y','LineWidth',3);
     end
     
