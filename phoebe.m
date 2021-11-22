@@ -133,6 +133,7 @@ set(handles.max_optode_dist_edit,'String',num2str(settings.max_sd_range));
 set(handles.edit_SCIwindow,'string',num2str(settings.sci_window));
 set(handles.edit_spectral_threshold,'string',num2str(settings.psp_threshold));
 set(handles.slider_opacity,'value',settings.opacity);
+set(handles.popupmenu_device,'value',settings.device)
 handles.baud_rate = settings.baud_rate;
 handles.com_port = settings.com_port;
 handles.patriot_hemisphere = settings.patriot_hemisphere;
@@ -401,6 +402,7 @@ handles.settings.max_sd_range = str2double(get(handles.max_optode_dist_edit,'Str
 handles.settings.opacity = get(handles.slider_opacity,'Value');
 handles.settings.view_left = get(handles.axes_left,'View');
 handles.settings.view_right = get(handles.axes_right,'View');
+handles.settings.device = get(handles.popupmenu_device,'Value');
 saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
 % Hint: delete(hObject) closes the figure
 if ~isempty(instrfind)
