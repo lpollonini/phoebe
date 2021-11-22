@@ -223,7 +223,23 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
             %TBD
    
         case 3  % OxySOft
-            %TBD
+            result = lsl_resolve_byprop(lib,'name','Oxysoft');
+            if ~isempty(result)
+                inlet = lsl_inlet(result{1});
+                [~,~] = inlet.pull_chunk();
+            else
+                uiwait(warndlg(sprintf('LSL stream not found.\n\nPlease check on the menu Data Collection -> LSL Mapping if streaming is active'),'PHOEBE'))
+                set(handles.togglebutton_scan,'String','START MONITORING');
+                set(handles.togglebutton_scan,'Value',0);
+                set(handles.radiobutton_singleview,'Enable','on');
+                set(handles.radiobutton_doubleview,'Enable','on');
+                guidata(hObject,handles)
+                return
+            end
+            
+%             SD = parse_fnirs_channels_nirstar(inlet);
+%             handles.src_pts = parse_source_coordinates_nirstar(inlet);
+%             handles.det_pts = parse_detector_coordinates_nirstar(inlet);
     end
     
     % LUCA: it may still be a good idea to check that the LSL stream is
@@ -305,6 +321,11 @@ while ishandle(hObject) && get(hObject,'Value')
     % Pull fNIRS signals from buffer
     nirs_data1 = lsl_buffer(:,SD(:,3));
     nirs_data2 = lsl_buffer(:,SD(:,4));
+    
+    % With Artinis, convert HbO/HbR to OD
+    if get(handles.popupmenu_device,'value') == 3
+        %Convert Hb to
+    end
     
     % Filter everything but the cardiac component
     filtered_nirs_data1=filtfilt(B,A,nirs_data1);       % Cardiac bandwidth
