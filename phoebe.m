@@ -237,7 +237,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 return
             end
             
-%             SD = parse_fnirs_channels_nirstar(inlet);
+             SD = parse_fnirs_channels_oxysoft(inlet);
 %             handles.src_pts = parse_source_coordinates_nirstar(inlet);
 %             handles.det_pts = parse_detector_coordinates_nirstar(inlet);
     end
