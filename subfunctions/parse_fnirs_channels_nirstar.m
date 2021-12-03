@@ -15,71 +15,6 @@ stream_name= stream_info.name();
 stream_mac= stream_info.type();
 stream_n_channels = stream_info.channel_count();
 
-% %% Store Source location in a containers map
-% 
-% % Get number of sources
-% nsources = tags.child('montage').child_value('nsources');
-% ns= str2num(nsources);
-% 
-% % Create 3 container.maps for x,y and z coordinates
-% xs_cor = containers.Map('KeyType','double','ValueType','any');
-% ys_cor = containers.Map('KeyType','double','ValueType','any');
-% zs_cor = containers.Map('KeyType','double','ValueType','any');
-% 
-% % Define source pointer
-% source_pnt = stream_info.desc().child('montage').child('optodes').child('sources').child('source');
-% 
-% 
-% sc=0;
-% 
-% % Run for loop to gather all the sources x,y,z coordinates
-% for i=1:ns
-%     sc= i+1;
-%     src_x= source_pnt.child('location').child_value('x');
-%     dtc_y= source_pnt.child('location').child_value('y');
-%     dtc_z= source_pnt.child('location').child_value('z');
-% 
-%     xs_cor(sc) = [src_x];
-%     ys_cor(sc) = [dtc_y];
-%     zs_cor(sc) = [dtc_z];
-% 
-%     source_pnt = source_pnt.next_sibling();
-%     source_location = source_pnt.child('location').next_sibling();
-% end
-% 
-% 
-% 
-% %% Store Detector location in a containers map
-% 
-% % Get number of sources
-% ndetectors = tags.child('montage').child_value('ndetectors');
-% nd= str2num(ndetectors);
-% 
-% % Create 3 container.maps for x,y and z coordinates
-% xd_cor = containers.Map('KeyType','double','ValueType','any');
-% yd_cor = containers.Map('KeyType','double','ValueType','any');
-% zd_cor = containers.Map('KeyType','double','ValueType','any');
-% 
-% % Define source pointer
-% detector_pnt = stream_info.desc().child('montage').child('optodes').child('detectors').child('detector');
-% 
-% dt=0;
-% 
-% % Run for loop to gather all the detectord x,y,z coordinates
-% for m=1:nd
-%     dt= m+1;
-%     dtc_x= detector_pnt.child('location').child_value('x');
-%     dtc_y= detector_pnt.child('location').child_value('y');
-%     dtc_z= detector_pnt.child('location').child_value('z');
-% 
-%     xd_cor(dt) = [dtc_x];
-%     yd_cor(dt) = [dtc_y];
-%     zd_cor(dt) = [dtc_z];
-% 
-%     detector_pnt = detector_pnt.next_sibling();
-%     detector_location = detector_pnt.child('location').next_sibling();
-% end
-
 %% Scan LSL metadata to parse information about fNIRS channels only 
 
 ch = stream_info.desc().child('channels').child('channel');
@@ -87,8 +22,8 @@ ch = stream_info.desc().child('channels').child('channel');
 % Fill measurement list channel-by-channel
 % Columns: [s d wl lsl_vector_index) 
 nirs_channel = 1;
-for k = 1:(stream_n_channels)
-    if strcmp(ch.child_value('type'),'nirs_raw')    %If the channel is NIRS, let's parse the metadata
+for k = 1:(stream_n_channels)  
+    if strcmp(ch.child_value('type'),'nirs_raw')||strcmp(ch.child_value('type'),'nirs_hb')    %If the channel is NIRS, let's parse the metadata
         label = ch.child_value('label');
         wl = ch.child_value('wavelength');
         rg = regexp(label,'(?<s>\d+)-(?<d>\d+)','names'); %extract the source number s and detector number d

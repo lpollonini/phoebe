@@ -19,7 +19,7 @@ for k = 1:(stream_n_channels)
     if strcmp(ch.child_value('type'),'NIRS')    %If the channel is NIRS, let's parse the metadata
         label = ch.child_value('label');
         %wl = ch.child_value('wavelength');
-        rg1= regexp(label,'Rx(?<s>\d+) - L(?<d>\d+)','names'); %extract the source number s and detector number d
+        rg1= regexp(label,'Rx(?<d>\d+) - L(?<s>\d+)','names'); %extract the source number s and detector number d
         rg2 = regexp(label,'(?<wl>\d+)nm]','names');
         meas_list(nirs_channel,1) = str2double(rg1.s);
         meas_list(nirs_channel,2) = str2double(rg1.d);
@@ -30,6 +30,7 @@ for k = 1:(stream_n_channels)
         else
             meas_list(nirs_channel,3) = 840;
         end
+
 
         meas_list(nirs_channel,4) = k;   % This is the index(position) of channel in the LSL vector being streamed
         nirs_channel = nirs_channel +1;   % Increase nirs channel counter 
@@ -46,7 +47,7 @@ wl_list = unique(meas_list(:,3));
 %If wl_list is only two wavelengths, we are good. If more than two, we must select the two preferred wavelengths
 
 measurement_matrix = zeros(size(meas_list,1)/length(wl_list),4); %Prepare for efficiency
-[channel_list,~,~] = unique(meas_list(:,1:2),'rows');   % Pull unique list of s-d pairings
+[channel_list,a,b] = unique(meas_list(:,1:2),'rows');   % Pull unique list of s-d pairings
 
 % For all occurrences of each s-d pairings, copy LSL index into column 3 and 4 of new matrix 
 for i = 1: size(channel_list,1)
