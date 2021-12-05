@@ -1,5 +1,8 @@
-function measurement_matrix = parse_fnirs_channels_oxysoft(inlet)
-
+function [measurement_matrix,type] = parse_fnirs_channels_oxysoft(inlet)
+% meausurement matrix [#channels x 4] contains the S-D pairings (cols 1-2)
+% and the LSL vector indices (cols 3-4) for either wavelength 1-2 or
+% HbO-HbR
+% type: 0 for raw data, 1 for hemoglobin
 
 %Get information about the stream
 stream_info = inlet.info();
@@ -31,7 +34,6 @@ for k = 1:(stream_n_channels)
             meas_list(nirs_channel,3) = 840;
         end
 
-
         meas_list(nirs_channel,4) = k;   % This is the index(position) of channel in the LSL vector being streamed
         nirs_channel = nirs_channel +1;   % Increase nirs channel counter 
     end
@@ -45,9 +47,10 @@ end
 % Extract list of all wavelengths streamed by this device
 wl_list = unique(meas_list(:,3));
 %If wl_list is only two wavelengths, we are good. If more than two, we must select the two preferred wavelengths
+type = 1; 
 
 measurement_matrix = zeros(size(meas_list,1)/length(wl_list),4); %Prepare for efficiency
-[channel_list,a,b] = unique(meas_list(:,1:2),'rows');   % Pull unique list of s-d pairings
+channel_list = unique(meas_list(:,1:2),'rows');   % Pull unique list of s-d pairings
 
 % For all occurrences of each s-d pairings, copy LSL index into column 3 and 4 of new matrix 
 for i = 1: size(channel_list,1)

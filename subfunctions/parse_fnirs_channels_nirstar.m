@@ -1,4 +1,8 @@
-function measurement_matrix = parse_fnirs_channels_nirstar(inlet)
+function [measurement_matrix,type] = parse_fnirs_channels_nirstar(inlet)
+% meausurement matrix [#channels x 4] contains the S-D pairings (cols 1-2)
+% and the LSL vector indices (cols 3-4) for either wavelength 1-2 or
+% HbO-HbR
+% type: 0 for raw data, 1 for hemoglobin
 
 % get the full stream info (including custom meta-data) and dissect it
 inf = inlet.info();
@@ -23,9 +27,17 @@ ch = stream_info.desc().child('channels').child('channel');
 % Columns: [s d wl lsl_vector_index) 
 nirs_channel = 1;
 for k = 1:(stream_n_channels)  
-    if strcmp(ch.child_value('type'),'nirs_raw')||strcmp(ch.child_value('type'),'nirs_hb')    %If the channel is NIRS, let's parse the metadata
+    if strcmp(ch.child_value('type'),'nirs_raw')||contains(ch.child_value('type'),'nirs_hb')    %If the channel is NIRS, let's parse the metadata
         label = ch.child_value('label');
         wl = ch.child_value('wavelength');
+        if isempty(wl)
+           if strcmp(ch.child_value('type'),'nirs_hbo')
+               wl = '0';
+           end
+           if strcmp(ch.child_value('type'),'nirs_hbr')
+               wl = '1';
+           end    
+        end
         rg = regexp(label,'(?<s>\d+)-(?<d>\d+)','names'); %extract the source number s and detector number d
         meas_list(nirs_channel,1) = str2double(rg.s);
         meas_list(nirs_channel,2) = str2double(rg.d);
@@ -40,7 +52,19 @@ end
 
 % Extract list of all wavelengths streamed by this device
 wl_list = unique(meas_list(:,3));
-%If wl_list is only two wavelengths, we are good. If more than two, we must select the two preferred wavelengths
+% If wl_list is only two wavelengths, we are good. If more than two, we must select the two preferred wavelengths
+% If NIRStar streams both Hb and raw, let's keep only the raw by removing
+% the 0 and 1 coded wavelengths indicating HbO and HbR respectively 
+if length(wl_list) > 2
+   wl_list(wl_list < 10)=[];
+   meas_list(meas_list(:,3) < 10,:)=[];
+end
+% If NIRStar streams only Hb, let's set the flag type to 1 (hb is streamed)  
+if wl_list < 10
+    type = 1;
+else
+    type = 0;
+end
 
 measurement_matrix = zeros(size(meas_list,1)/length(wl_list),4); %Prepare for efficiency
 channel_list = unique(meas_list(:,1:2),'rows');   % Pull unique list of s-d pairings
