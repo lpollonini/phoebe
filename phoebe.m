@@ -198,6 +198,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
        return
     end
     
+    hb_streamed = 0;
     % Resolve LSL stream depending on selected software/instrument
     switch(get(handles.popupmenu_device,'value'))
         case 1  % NIRStar
@@ -214,10 +215,10 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 guidata(hObject,handles)
                 return
             end
-            
-            SD = parse_fnirs_channels_nirstar(inlet);
+            [SD,hb_streamed] = parse_fnirs_channels_nirstar(inlet);
             handles.src_pts = parse_source_coordinates_nirstar(inlet);
             handles.det_pts = parse_detector_coordinates_nirstar(inlet);
+            lambda = [760,850];
             
         case 2  % Aurora
             %TBD
@@ -236,11 +237,17 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
                 guidata(hObject,handles)
                 return
             end
-            
-             SD = parse_fnirs_channels_oxysoft(inlet);
+             [SD,hb_streamed] = parse_fnirs_channels_oxysoft(inlet);
+             lambda = [760,840];
 %             handles.src_pts = parse_source_coordinates_nirstar(inlet);
 %             handles.det_pts = parse_detector_coordinates_nirstar(inlet);
     end
+    
+    % extinction coefficients
+    load('spectra.mat','hbo','hbr')
+    ext(:,1) = interp1(hbo(:,1),hbo(:,2),lambda);       % HbO extinction
+    ext(:,2) = interp1(hbr(:,1),hbr(:,2),lambda);        % HbR extinction
+    %ext = bsxfun( @times, ext, L*PPF );
     
     % LUCA: it may still be a good idea to check that the LSL stream is
     % consistent with PHOEBE graphics to avoid drawing issues. With the
@@ -248,7 +255,6 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     % check that number of sources, detectors and (maybe) channels all
     % coincide, and we could do it for all devices
 
-    
     % Prepare the LSL buffer (window_time x LSL_channel_count, all devices)
     handles.fs = result{1}.nominal_srate;
     buffer_rows = floor(handles.fs*str2double(get(handles.edit_SCIwindow,'string'))); % Number of frames to be buffered
@@ -324,9 +330,8 @@ while ishandle(hObject) && get(hObject,'Value')
     nirs_data1 = lsl_buffer(:,SD(:,3));
     nirs_data2 = lsl_buffer(:,SD(:,4));
     
-    % With Artinis, convert HbO/HbR to OD
-    if get(handles.popupmenu_device,'value') == 3
-        
+    if hb_streamed
+        [nirs_data1,nirs_data2] = hb2raw(nirs_data1,nirs_data2,ext);
     end
     
     % Filter everything but the cardiac component
