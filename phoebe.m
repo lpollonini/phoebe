@@ -360,12 +360,12 @@ while ishandle(hObject) && get(hObject,'Value')
     end
     
     % Weight boolean matrix: here we set the criteria for passing thresholds
-    W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) & (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); 
+    W = (sci_matrix >= str2double(get(handles.edit_threshold,'string'))) + (power_matrix >= str2double(get(handles.edit_spectral_threshold,'string'))); 
     
     % Display results at the optode level or the channel level
     if get(handles.radiobutton_qoptode,'Value')
         % Computes optodes coupling status: coupled (1), uncoupled (0) or undetermined (-1).
-        [optodes_status] = boolean_system(num_optodes,A_matrix,W); 
+        [optodes_status] = boolean_system(num_optodes,A_matrix,W>0); 
         optodes_color = zeros(length(optodes_status),3);
         for i=1:length(optodes_status)
             switch(optodes_status(i))
@@ -388,16 +388,22 @@ while ishandle(hObject) && get(hObject,'Value')
         
     else % Channel solution: update links color
         for i = 1 : size(SD,1)
-            if W(SD(i,1),size(handles.src_pts,1)+SD(i,2))
-                set(h_links_left(i),'Color','g')
-                if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                    set(h_links_right(i),'Color','g')
-                end
-            else
-                set(h_links_left(i),'Color','r')
-                if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                    set(h_links_right(i),'Color','r')
-                end
+            switch W(SD(i,1),size(handles.src_pts,1)+SD(i,2))
+                case 2: % both sci and psp over threshold (good channel)
+                    set(h_links_left(i),'Color','g')
+                    if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+                        set(h_links_right(i),'Color','g')
+                    end
+                case 1: % only one between sci and psp over threshold (movement artifact)
+                    set(h_links_left(i),'Color','y')
+                    if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+                        set(h_links_right(i),'Color','y')
+                    end
+                case 0: % both sci and psp under threshold (bad channel)
+                    set(h_links_left(i),'Color','r')
+                    if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+                        set(h_links_right(i),'Color','r')
+                    end
             end
         end
         drawnow
