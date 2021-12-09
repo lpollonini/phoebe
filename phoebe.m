@@ -389,17 +389,17 @@ while ishandle(hObject) && get(hObject,'Value')
     else % Channel solution: update links color
         for i = 1 : size(SD,1)
             switch W(SD(i,1),size(handles.src_pts,1)+SD(i,2))
-                case 2: % both sci and psp over threshold (good channel)
+                case 2 % both sci and psp over threshold (good channel)
                     set(h_links_left(i),'Color','g')
                     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
                         set(h_links_right(i),'Color','g')
                     end
-                case 1: % only one between sci and psp over threshold (movement artifact)
+                case 1 % only one between sci and psp over threshold (movement artifact)
                     set(h_links_left(i),'Color','y')
                     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
                         set(h_links_right(i),'Color','y')
                     end
-                case 0: % both sci and psp under threshold (bad channel)
+                case 0 % both sci and psp under threshold (bad channel)
                     set(h_links_left(i),'Color','r')
                     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
                         set(h_links_right(i),'Color','r')
