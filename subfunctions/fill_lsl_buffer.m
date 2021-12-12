@@ -18,10 +18,18 @@ while nnz(lsl_buffer(:,1)) < size(lsl_buffer,1) % if the FIFO buffer is not tota
     end% Put chunk in buffer
 end
 % We are repeating the same code above to make room for new samples when the buffer is already filled from previous pulls 
+t_start = tic;
 while 1
     [chunk,~] = inlet.pull_chunk(); % Pull a chunk of fresh samples
     if ~isempty(chunk)
+        t_start = tic;
         break
+    else
+        elapsed = toc(t_start);
+        if elapsed > 10
+           lsl_buffer(:) = NaN;
+           return 
+        end
     end
 end
 chunk = chunk';

@@ -132,7 +132,7 @@ set(handles.min_optode_dist_edit,'String',num2str(settings.min_sd_range));
 set(handles.max_optode_dist_edit,'String',num2str(settings.max_sd_range));
 set(handles.edit_SCIwindow,'string',num2str(settings.sci_window));
 set(handles.edit_spectral_threshold,'string',num2str(settings.psp_threshold));
-set(handles.slider_opacity,'value',settings.opacity);
+set(handles.slider_opacity,'value',1-settings.opacity);
 set(handles.popupmenu_device,'value',settings.device)
 handles.baud_rate = settings.baud_rate;
 handles.com_port = settings.com_port;
@@ -325,6 +325,15 @@ while ishandle(hObject) && get(hObject,'Value')
     
     % Fill lsl_buffer (FIFO) with new data
     lsl_buffer = fill_lsl_buffer(inlet,lsl_buffer);
+    if isnan(lsl_buffer)
+        uiwait(warndlg(sprintf('LSL stream interrupted'),'PHOEBE'))
+        set(handles.togglebutton_scan,'String','START MONITORING');
+        set(handles.togglebutton_scan,'Value',0);
+        set(handles.radiobutton_singleview,'Enable','on');
+        set(handles.radiobutton_doubleview,'Enable','on');
+        guidata(hObject,handles)
+        return
+    end
     
     % Pull fNIRS signals from buffer
     nirs_data1 = lsl_buffer(:,SD(:,3));
@@ -433,7 +442,7 @@ handles.settings.sci_window = str2double(get(handles.edit_SCIwindow,'string'));
 handles.settings.psp_threshold = str2double(get(handles.edit_spectral_threshold,'string'));
 handles.settings.min_sd_range = str2double(get(handles.min_optode_dist_edit,'String'));
 handles.settings.max_sd_range = str2double(get(handles.max_optode_dist_edit,'String'));
-handles.settings.opacity = get(handles.slider_opacity,'Value');
+handles.settings.opacity = 1 - get(handles.slider_opacity,'Value');
 handles.settings.view_left = get(handles.axes_left,'View');
 handles.settings.view_right = get(handles.axes_right,'View');
 handles.settings.device = get(handles.popupmenu_device,'Value');
