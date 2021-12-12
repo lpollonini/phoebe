@@ -265,7 +265,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     
     % Plot filled markers in red and blue
     hold(handles.axes_right,'on')
-    if exist('handles.h_src_left','var')
+    if isfield(handles,'h_src_left')
         delete(handles.h_src_left);
         delete(handles.h_det_left);
         delete(handles.h_txt_src_left);
@@ -291,7 +291,7 @@ if get(hObject,'Value') %If currently STOPed (not monitoring), execute this LSL 
     h_links_left = line(handles.axes_left,px,py,pz,'Color','y','LineWidth',3);
     % Do the same for right axes 
     if get(handles.uipanel_head,'SelectedObject') == handles.radiobutton_doubleview
-        if exist('handles.h_src_right','var')
+        if isfield(handles,'h_src_right')
             delete(handles.h_src_right);
             delete(handles.h_det_right);
             delete(handles.h_txt_src_right);
@@ -456,7 +456,7 @@ function slider_opacity_Callback(hObject, ~, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-handles.opacity = get(hObject,'Value');
+handles.opacity = 1 - get(hObject,'Value');
 
 if isfield(handles,'fid_pts')
     set(handles.h_scalp_left,'FaceAlpha',handles.opacity)
