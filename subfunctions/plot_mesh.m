@@ -1,10 +1,15 @@
-function p = plot_mesh(handle, faces, vertices, opacity)
+function p = plot_mesh(handle, faces, vertices, opacity, tissue)
     
 axes(handle);
 if any(any(faces == 0)) %FIX: useful?
     faces = faces+1;
 end
-p = patch('vertices', vertices, 'faces', faces, 'facecolor', [1,.75,.65]);
+if strcmp(tissue,'scalp')
+    color = [1,.75,.65];
+elseif strcmp(tissue,'brain')
+    color = [.93,.93,.93];
+end
+p = patch('vertices', vertices, 'faces', faces, 'facecolor', color); 
 set(p,'EdgeColor','none')
 set(p,'FaceAlpha',opacity)
 set(p, 'specularcolorreflectance', 0, 'specularexponent',50);

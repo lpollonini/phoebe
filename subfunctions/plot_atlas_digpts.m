@@ -1,8 +1,8 @@
 current_view = handles.axes_left.View;
 cla(handles.axes_left)
 hold(handles.axes_left,'on')
-handles.h_scalp_left = plot_mesh(handles.axes_left,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity); % faces and vertices are the atlas graphical variables
-plot_mesh(handles.axes_left,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1);
+handles.h_scalp_left = plot_mesh(handles.axes_left,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity,'scalp'); % faces and vertices are the atlas graphical variables
+plot_mesh(handles.axes_left,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1,'brain');
 scatter3(handles.axes_left,handles.atlas_fid_pts(:,1), handles.atlas_fid_pts(:,2), handles.atlas_fid_pts(:,3), 20,'y','fill'); % Plot atlas fiducials
 scatter3(handles.axes_left,handles.fid_pts(:,1), handles.fid_pts(:,2), handles.fid_pts(:,3),20,'g','fill'); % Plot digitized fiducials after affine transformation
 text(handles.axes_left,handles.fid_pts(:,1), handles.fid_pts(:,2), handles.fid_pts(:,3), ['  NZ';'  AR';'  AL'],'Color','g');
@@ -24,8 +24,8 @@ if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
     current_view = handles.axes_right.View;
     cla(handles.axes_right)
     hold(handles.axes_right,'on')
-    handles.h_scalp_right = plot_mesh(handles.axes_right,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity);
-    plot_mesh(handles.axes_right,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1);
+    handles.h_scalp_right = plot_mesh(handles.axes_right,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity,'scalp');
+    plot_mesh(handles.axes_right,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1,'brain');
     scatter3(handles.axes_right,handles.atlas_fid_pts(:,1), handles.atlas_fid_pts(:,2), handles.atlas_fid_pts(:,3), 20,'y','fill')
     scatter3(handles.axes_right,handles.fid_pts(:,1), handles.fid_pts(:,2), handles.fid_pts(:,3), 20,'g','fill')
     text(handles.axes_right,handles.fid_pts(:,1), handles.fid_pts(:,2), handles.fid_pts(:,3), ['  NZ';'  AR';'  AL'],'Color','g');
