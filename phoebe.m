@@ -438,6 +438,9 @@ if get(handles.uibuttongroup_qc,'SelectedObject') == handles.radiobutton_qoptode
 else
     handles.settings.quality_view = "channels";
 end
+if ~isfield(handles,'fid_pts')
+    handles.settings.dig_pts_path = '';
+end
 handles.settings.sci_window = str2double(get(handles.edit_SCIwindow,'string'));
 handles.settings.psp_threshold = str2double(get(handles.edit_spectral_threshold,'string'));
 handles.settings.min_sd_range = str2double(get(handles.min_optode_dist_edit,'String'));
@@ -466,15 +469,18 @@ function slider_opacity_Callback(hObject, ~, handles)
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 handles.opacity = 1 - get(hObject,'Value');
-
-if isfield(handles,'fid_pts')
-    set(handles.h_scalp_left,'FaceAlpha',handles.opacity)
+set(handles.h_scalp_left,'FaceAlpha',handles.opacity)
     if ~isempty(allchild(handles.axes_right))
         set(handles.h_scalp_right,'FaceAlpha',handles.opacity)
     end
-else
-    plot_atlas_empty;
-end
+% if isfield(handles,'fid_pts')
+%     set(handles.h_scalp_left,'FaceAlpha',handles.opacity)
+%     if ~isempty(allchild(handles.axes_right))
+%         set(handles.h_scalp_right,'FaceAlpha',handles.opacity)
+%     end
+% else
+%     plot_atlas_empty;
+% end
 guidata(hObject, handles);
 
 

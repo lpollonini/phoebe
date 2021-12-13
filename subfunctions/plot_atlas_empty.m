@@ -3,7 +3,7 @@ set(handles.uipanel_head,'SelectedObject',handles.radiobutton_doubleview); % Alw
 cla(handles.axes_left);
 cla(handles.axes_right);
 set(handles.axes_left,'Position',[0.05,0.025,0.5,0.95]);
-plot_mesh(handles.axes_left,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity,'scalp');
+handles.h_scalp_left = plot_mesh(handles.axes_left,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity,'scalp');
 plot_mesh(handles.axes_left,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1,'brain');
 hold(handles.axes_left,'on')
 scatter3(handles.axes_left,handles.atlas_fid_pts(:,1), handles.atlas_fid_pts(:,2), handles.atlas_fid_pts(:,3), 20,'y','fill'); % Plot atlas fiducials    axis([-130 130 -230 130 -100 150]) % FIX Automatic setting to fit large head or tall optodes
@@ -19,7 +19,7 @@ h_rot3d.Enable = 'on';
 % If double view, do the same on the right head
 if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
     current_view = handles.axes_right.View;
-    plot_mesh(handles.axes_right,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity,'scalp');
+    handles.h_scalp_right = plot_mesh(handles.axes_right,handles.faces(:,2:4), handles.vertices(:,2:4),handles.opacity,'scalp');
     plot_mesh(handles.axes_right,handles.faces_brain(:,2:4), handles.vertices_brain(:,2:4),1,'brain');
     hold(handles.axes_right,'on')
     scatter3(handles.axes_right,handles.atlas_fid_pts(:,1), handles.atlas_fid_pts(:,2), handles.atlas_fid_pts(:,3), 20,'y','fill'); % Plot atlas fiducials        axis([-130 130 -230 130 -100 150]) % FIX autoset larger view
@@ -34,6 +34,11 @@ if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
 else
     set(handles.axes_right,'Visible','off');
     cla(handles.axes_right);
+end
+if isfield(handles,'fid_pts')
+    handles = rmfield(handles,'fid_pts');
+    handles = rmfield(handles,'src_pts');
+    handles = rmfield(handles,'det_pts');
 end
 guidata(hObject,handles);
 
