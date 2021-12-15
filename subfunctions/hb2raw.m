@@ -33,6 +33,6 @@ end
 % Y2 = exp( -bsxfun(@minus, Y2, 3) );
 Y1 = exp(-Y1);
 Y2 = exp(-Y2);
-if ~isreal(Y1)||~isreal(Y1)
+if ~isreal(Y1)||~isreal(Y2)
     warning('OD contains complex numbers');
 end
