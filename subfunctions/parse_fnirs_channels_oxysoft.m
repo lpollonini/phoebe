@@ -22,17 +22,24 @@ for k = 1:(stream_n_channels)
     if strcmp(ch.child_value('type'),'NIRS')    %If the channel is NIRS, let's parse the metadata
         label = ch.child_value('label');
         %wl = ch.child_value('wavelength');
-        rg1= regexp(label,'Rx(?<d>\d+) - L(?<s>\d+)','names'); %extract the source number s and detector number d
-        rg2 = regexp(label,'(?<wl>\d+)nm]','names');
+        rg1= regexp(label,'Rx(?<d>\d+) - Tx(?<s>\d+)','names'); %extract the source number s and detector number d
+        %rg2 = regexp(label,'(?<wl>\d+)nm]','names');
+        rg2 = regexp(label,'(?<wl>.)Hb','names');
+        if strcmp(rg2.wl,'H')
+           wl = '1';
+        end
+        if strcmp(rg2.wl,'2')
+           wl = '0';
+        end
         meas_list(nirs_channel,1) = str2double(rg1.s);
         meas_list(nirs_channel,2) = str2double(rg1.d);
-        meas_list(nirs_channel,3) = str2double(rg2.wl);
+        meas_list(nirs_channel,3) = str2double(wl);
 
-        if (meas_list(nirs_channel,3)>700) && (meas_list(nirs_channel,3)<799)
-            meas_list(nirs_channel,3) = 760;
-        else
-            meas_list(nirs_channel,3) = 840;
-        end
+%         if (meas_list(nirs_channel,3)>700) && (meas_list(nirs_channel,3)<799)
+%             meas_list(nirs_channel,3) = 760;
+%         else
+%             meas_list(nirs_channel,3) = 840;
+%         end
 
         meas_list(nirs_channel,4) = k;   % This is the index(position) of channel in the LSL vector being streamed
         nirs_channel = nirs_channel +1;   % Increase nirs channel counter 
