@@ -148,7 +148,8 @@ main_data = guidata(handles_main);
 main_data.com_port = handles.com_port;
 main_data.baud_rate = handles.baud_rate;
 main_data.patriot_hemisphere = get(handles.popupmenu_orientation,'Value');
-save([pwd filesep 'init.mat'],'-struct','main_data','baud_rate','com_port','patriot_hemisphere','-append');
+%save([pwd filesep 'init.mat'],'-struct','main_data','baud_rate','com_port','patriot_hemisphere','-append');
+saveJSONfile(handles.settings,[pwd filesep 'settings.json']);
 guidata(handles_main, main_data);
 
 close (handles.figure_settings)

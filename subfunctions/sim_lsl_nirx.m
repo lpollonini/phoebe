@@ -19,7 +19,7 @@ else
     unit_type = 'Hb';
 end
 
-raw = nirs.io.loadNIRx(path2folder);
+raw = nirs.io.loadNIRx_fixed(path2folder);
 raw = raw.sorted({'source','detector'});
 
 nsrc = size(raw.probe.srcPos,1);

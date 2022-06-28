@@ -389,30 +389,37 @@ while ishandle(hObject) && get(hObject,'Value')
         % Update optodes graphics
         set(h_src_left,'CData',optodes_color(1:size(handles.src_pts,1),:));
         set(h_det_left,'CData',optodes_color(size(handles.src_pts,1)+1:end,:));
+        set(h_links_left,'Color','k','LineWidth',1)
         if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
             set(h_src_right,'CData',optodes_color(1:size(handles.src_pts,1),:));
             set(h_det_right,'CData',optodes_color(size(handles.src_pts,1)+1:end,:));
+            set(h_links_right,'Color','k','LineWidth',1)
         end
-        drawnow
-        
+        drawnow  
     else % Channel solution: update links color
         for i = 1 : size(SD,1)
             switch W(SD(i,1),size(handles.src_pts,1)+SD(i,2))
                 case 2 % both sci and psp over threshold (good channel)
-                    set(h_links_left(i),'Color','g')
+                    set(h_links_left(i),'Color','g','LineWidth',3)
                     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                        set(h_links_right(i),'Color','g')
+                        set(h_links_right(i),'Color','g','LineWidth',3)
                     end
                 case 1 % only one between sci and psp over threshold (movement artifact)
-                    set(h_links_left(i),'Color','y')
+                    set(h_links_left(i),'Color','y','LineWidth',3)
                     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                        set(h_links_right(i),'Color','y')
+                        set(h_links_right(i),'Color','y','LineWidth',3)
                     end
                 case 0 % both sci and psp under threshold (bad channel)
-                    set(h_links_left(i),'Color','r')
+                    set(h_links_left(i),'Color','r','LineWidth',3)
                     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
-                        set(h_links_right(i),'Color','r')
+                        set(h_links_right(i),'Color','r','LineWidth',3)
                     end
+            end
+            set(h_src_left,'CData',[1 0 0]);
+            set(h_det_left,'CData',[0 0 1]);
+            if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
+                set(h_src_right,'CData',[1 0 0]);
+                set(h_det_right,'CData',[0 0 1]);
             end
         end
         drawnow

@@ -191,7 +191,8 @@ if (handles.opt_counter>handles.src_num)&&(handles.opt_counter<=handles.src_num+
         end
         fclose(fid);
         dig_pts_path = [PathName FileName];
-        save([pwd filesep 'init.mat'],'dig_pts_path','-append')
+        %save([pwd filesep 'init.mat'],'dig_pts_path','-append')
+        saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
         main_data.dig_pts_path = dig_pts_path; 
         
         min_pts_range = str2double(get(handles.edit_min_distance,'String'));
@@ -224,7 +225,8 @@ if (handles.opt_counter>handles.src_num)&&(handles.opt_counter<=handles.src_num+
             [FileName,PathName] = uiputfile('*.SD','Save the probe file (MAT struct format)',[PathName FileName(1:end-4) '.SD']);
             save([PathName FileName],'SD','-mat');
             pairings_path = [PathName FileName];
-            save([pwd filesep 'init.mat'],'pairings_path','-append')
+            %save([pwd filesep 'init.mat'],'pairings_path','-append')
+            saveJSONfile(handles.settings,[pwd filesep 'settings.json'])
             main_data.pairings_path = pairings_path;
             for i=1:size(SD.MeasList,1)
                 p1 = handles.src_pts(SD.MeasList(i,1),:);

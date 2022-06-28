@@ -112,7 +112,8 @@ SD.MeasList = [MeasList; MeasList2];
 pairings_path = [main_data.dig_pts_path(1:end-4) '_pairings.SD'];
 set(handles.text_pairings_filename,'String',['Source-Detector Pairings_file = ' pairings_path]);
 save(pairings_path,'SD');
-save([pwd filesep 'init.mat'],'pairings_path','-append')
+%save([pwd filesep 'init.mat'],'pairings_path','-append')
+saveJSONfile(handles.settings,[pwd filesep 'settings.json']);
 main_data.pairings_path = pairings_path;
 guidata(handles_main, main_data);
 close(handles.figure_create_pairings)
