@@ -1,0 +1,20 @@
+{
+	"baud_rate" : 115200,
+	"com_port" : "COM1",
+	"device" : 3,
+	"patriot_hemisphere" : 1,
+	"zoom_index" : 0.5,
+	"opacity" : 0.24159,
+	"fcut_min" : 0.5,
+	"fcut_max" : 2,
+	"double_view" : 1,
+	"psp_threshold" : 0.1,
+	"sci_window" : 3,
+	"sci_threshold" : 0.75,
+	"min_sd_range" : 15,
+	"max_sd_range" : 40,
+	"view_left" : [-41.8323, 20.7889],
+	"view_right" : [38.7618, 17.8531],
+	"quality_view" : "channels",
+	"dig_pts_path" : ""
+}

@@ -40,7 +40,7 @@ if isfield(handles,'fid_pts')
     handles = rmfield(handles,'src_pts');
     handles = rmfield(handles,'det_pts');
 end
-guidata(hObject,handles);
+%guidata(hObject,handles);
 
 function rot3dcallback(obj,evd)
     handles = guidata(obj);
