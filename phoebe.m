@@ -133,6 +133,7 @@ set(handles.max_optode_dist_edit,'String',num2str(settings.max_sd_range));
 set(handles.edit_SCIwindow,'string',num2str(settings.sci_window));
 set(handles.edit_spectral_threshold,'string',num2str(settings.psp_threshold));
 set(handles.slider_opacity,'value',1-settings.opacity);
+set(handles.slider_zoom,'value',1-settings.zoom_index);
 set(handles.popupmenu_device,'value',settings.device)
 handles.baud_rate = settings.baud_rate;
 handles.com_port = settings.com_port;
@@ -453,6 +454,7 @@ handles.settings.psp_threshold = str2double(get(handles.edit_spectral_threshold,
 handles.settings.min_sd_range = str2double(get(handles.min_optode_dist_edit,'String'));
 handles.settings.max_sd_range = str2double(get(handles.max_optode_dist_edit,'String'));
 handles.settings.opacity = 1 - get(handles.slider_opacity,'Value');
+handles.settings.zoom_index = 1 - get(handles.slider_zoom,'Value');
 handles.settings.view_left = get(handles.axes_left,'View');
 handles.settings.view_right = get(handles.axes_right,'View');
 handles.settings.device = get(handles.popupmenu_device,'Value');
