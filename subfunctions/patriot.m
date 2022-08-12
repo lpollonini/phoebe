@@ -252,7 +252,7 @@ for i = 1:ns  % For all sources...
     view(134,26) % opposing view
     scatter3(handles.axes_left,handles.src_pts(i,1), handles.src_pts(i,2), handles.src_pts(i,3),80,'r','fill','SizeData',60,'LineWidth',2)
     %axes(handles.axes_left)
-    text(handles.axes_left,handles.src_pts(i,1), handles.src_pts(i,2),handles.src_pts(i,3),['  ' num2str(i)],,'Color','r','FontSize',15,'FontWeight','bold')
+    text(handles.axes_left,handles.src_pts(i,1), handles.src_pts(i,2),handles.src_pts(i,3),['  ' num2str(i)],'Color','r','FontSize',15,'FontWeight','bold')
     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview
         hold(handles.axes_right,'on')
         axis([-100 100 -200 100 -100 150])
@@ -261,7 +261,7 @@ for i = 1:ns  % For all sources...
         view(219,26) % opposing view
         scatter3(handles.axes_right,handles.src_pts(i,1), handles.src_pts(i,2), handles.src_pts(i,3),80,'r','fill','SizeData',60,'LineWidth',2) 
         %axes(handles.axes_right)
-        text(handles.axes_right,handles.src_pts(i,1), handles.src_pts(i,2),handles.src_pts(i,3),['  ' num2str(i)],,'Color','r','FontSize',15,'FontWeight','bold')
+        text(handles.axes_right,handles.src_pts(i,1), handles.src_pts(i,2),handles.src_pts(i,3),['  ' num2str(i)],'Color','r','FontSize',15,'FontWeight','bold')
         rotate3d on
     else
         set(handles.axes_right,'Visible','off');
@@ -310,7 +310,7 @@ for i = 1:nd % For all detectors
     hold(handles.axes_left,'on')
     scatter3(handles.axes_left,handles.det_pts(i,1), handles.det_pts(i,2), handles.det_pts(i,3),80,'b','fill','s','SizeData',60,'LineWidth',2)
     %axes(handles.axes_left)
-    text(handles.axes_left,handles.det_pts(i,1), handles.det_pts(i,2),handles.det_pts(i,3),['  ' num2str(i)],,'Color','b','FontSize',15,'FontWeight','bold')
+    text(handles.axes_left,handles.det_pts(i,1), handles.det_pts(i,2),handles.det_pts(i,3),['  ' num2str(i)],'Color','b','FontSize',15,'FontWeight','bold')
     %view([-x,30]) %changes view
     %view(165,10) %default
     view(219,26) %opposing view
@@ -318,7 +318,7 @@ for i = 1:nd % For all detectors
     if get(handles.uipanel_head,'SelectedObject')==handles.radiobutton_doubleview 
         scatter3(handles.axes_right,handles.det_pts(i,1), handles.det_pts(i,2), handles.det_pts(i,3),80,'b','fill','s','SizeData',60,'LineWidth',2)
         %axes(handles.axes_right)
-        text(handles.axes_right,handles.det_pts(i,1), handles.det_pts(i,2),handles.det_pts(i,3),['  ' num2str(i)],,'Color','b','FontSize',15,'FontWeight','bold')
+        text(handles.axes_right,handles.det_pts(i,1), handles.det_pts(i,2),handles.det_pts(i,3),['  ' num2str(i)],'Color','b','FontSize',15,'FontWeight','bold')
         %view([-x,30]) %changes view
         %view(165,10) %default
         view(134,26) % opposing view
