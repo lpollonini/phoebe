@@ -30,7 +30,7 @@ for k = 1:(stream_n_channels)
     if strcmp(ch.child_value('type'),'nirs_raw')||contains(ch.child_value('type'),'nirs_hb')    %If the channel is NIRS, let's parse the metadata
         label = ch.child_value('label');
         wl = ch.child_value('wavelength');
-        if isempty(wl)
+        if isempty(wl)  % HbO and HbR do not have a <wavelength> field
            if strcmp(ch.child_value('type'),'nirs_hbo')
                wl = '0';
            end
@@ -42,7 +42,7 @@ for k = 1:(stream_n_channels)
         meas_list(nirs_channel,1) = str2double(rg.s);
         meas_list(nirs_channel,2) = str2double(rg.d);
         meas_list(nirs_channel,3) = str2double(wl);
-        meas_list(nirs_channel,4) = k;   % This is the index(position) of channel in the LSL vector being streamed
+        meas_list(nirs_channel,4) = k;   % This is the index(position) of channel in the LSL vector being streamed (including frames and other non-channel data)
         nirs_channel = nirs_channel +1;   % Increase nirs channel counter 
     end
     ch = ch.next_sibling(); % Move to next LSL channel
@@ -66,7 +66,7 @@ else
     type = 0;
 end
 
-measurement_matrix = zeros(size(meas_list,1)/length(wl_list),4); %Prepare for efficiency
+measurement_matrix = zeros(size(meas_list,1)/length(wl_list),4); % Size: #channels x 4 (#s,#d,#lsl_index_wl1,#lsls_index_wl2)
 channel_list = unique(meas_list(:,1:2),'rows');   % Pull unique list of s-d pairings
 
 % For all occurrences of each s-d pairings, copy LSL index into column 3 and 4 of new matrix 
